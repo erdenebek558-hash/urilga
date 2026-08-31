@@ -4,20 +4,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Home() {
   const [step, setStep] = useState("home");
-  const fileInputRef = useRef(null);
+
+  const heroInputRef = useRef(null);
+  const venueInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+  const galleryRef = useRef(null);
 
   const [form, setForm] = useState({
     groom: "",
     bride: "",
+    hosts: "",
     date: "",
     time: "",
-    venue: "",
+    venueName: "",
+    venueAddress: "",
     mapUrl: "",
     message: "",
-    language: "Монгол",
-    template: "Цагаан сонгодог",
-    photo: "",
-    photoName: "",
+    heroPhoto: "",
+    venuePhoto: "",
+    gallery: [],
   });
 
   const [rsvpName, setRsvpName] = useState("");
@@ -43,23 +48,19 @@ export default function Home() {
     form.bride || "Бүсгүй"
   }`;
 
+  const hosts = form.hosts || "Хуримын эзэд";
   const date = form.date || "2026-10-10";
   const time = form.time || "17:00";
-  const venue = form.venue || "Хуримын ордон";
+  const venueName = form.venueName || "Хуримын ордон";
+  const venueAddress = form.venueAddress || "Улаанбаатар";
 
   const message =
     form.message ||
-    "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
+    "Эрхэм зочид оо! Хайр сэтгэлээ нэгтгэн амьдралын шинэ замаа эхлүүлэх энэ дурсамжит өдөр эрхэм таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
 
-  /* ---------------- ЗУРАГ ---------------- */
+  /* ===================== ЗУРАГ ===================== */
 
-  const openPhotoPicker = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handlePhoto = (e) => {
-    const file = e.target.files?.[0];
-
+  const readImage = (file, callback) => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -69,36 +70,103 @@ export default function Home() {
 
     const reader = new FileReader();
 
-    reader.onload = () => {
-      setForm((prev) => ({
-        ...prev,
-        photo: reader.result,
-        photoName: file.name,
-      }));
-    };
-
+    reader.onload = () => callback(reader.result);
     reader.readAsDataURL(file);
   };
 
-  const removePhoto = () => {
+  const handleHeroPhoto = (e) => {
+    const file = e.target.files?.[0];
+
+    readImage(file, (result) => {
+      setForm((prev) => ({
+        ...prev,
+        heroPhoto: result,
+      }));
+    });
+  };
+
+  const handleVenuePhoto = (e) => {
+    const file = e.target.files?.[0];
+
+    readImage(file, (result) => {
+      setForm((prev) => ({
+        ...prev,
+        venuePhoto: result,
+      }));
+    });
+  };
+
+  const handleGallery = (e) => {
+    const files = Array.from(e.target.files || [])
+      .filter((file) => file.type.startsWith("image/"))
+      .slice(0, 5);
+
+    if (!files.length) return;
+
+    Promise.all(
+      files.map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+
+            reader.onload = () =>
+              resolve({
+                id:
+                  Date.now().toString() +
+                  Math.random().toString(36),
+                src: reader.result,
+                name: file.name,
+              });
+
+            reader.readAsDataURL(file);
+          })
+      )
+    ).then((items) => {
+      setForm((prev) => ({
+        ...prev,
+        gallery: items,
+      }));
+    });
+  };
+
+  const removeHeroPhoto = () => {
     setForm((prev) => ({
       ...prev,
-      photo: "",
-      photoName: "",
+      heroPhoto: "",
     }));
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (heroInputRef.current) {
+      heroInputRef.current.value = "";
     }
   };
 
-  /* ---------------- COUNTDOWN ---------------- */
+  const removeVenuePhoto = () => {
+    setForm((prev) => ({
+      ...prev,
+      venuePhoto: "",
+    }));
+
+    if (venueInputRef.current) {
+      venueInputRef.current.value = "";
+    }
+  };
+
+  const removeGalleryPhoto = (id) => {
+    setForm((prev) => ({
+      ...prev,
+      gallery: prev.gallery.filter(
+        (item) => item.id !== id
+      ),
+    }));
+  };
+
+  /* ===================== COUNTDOWN ===================== */
 
   const targetDate = useMemo(() => {
     if (!form.date) return null;
 
-    const selectedTime = form.time || "00:00";
-    const value = new Date(`${form.date}T${selectedTime}:00`);
+    const targetTime = form.time || "00:00";
+    const value = new Date(`${form.date}T${targetTime}:00`);
 
     return Number.isNaN(value.getTime()) ? null : value;
   }, [form.date, form.time]);
@@ -114,7 +182,7 @@ export default function Home() {
   useEffect(() => {
     if (!targetDate) return;
 
-    const updateCountdown = () => {
+    const tick = () => {
       const diff = targetDate.getTime() - Date.now();
 
       if (diff <= 0) {
@@ -129,22 +197,22 @@ export default function Home() {
       }
 
       setCountdown({
-        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff / 3600000) % 24),
+        minutes: Math.floor((diff / 60000) % 60),
         seconds: Math.floor((diff / 1000) % 60),
         finished: false,
       });
     };
 
-    updateCountdown();
+    tick();
 
-    const timer = setInterval(updateCountdown, 1000);
+    const timer = setInterval(tick, 1000);
 
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  /* ---------------- RSVP ---------------- */
+  /* ===================== RSVP ===================== */
 
   const handleRsvp = () => {
     if (!rsvpName.trim()) {
@@ -163,9 +231,11 @@ export default function Home() {
 
     setRsvpName("");
     setRsvpStatus("Ирнэ");
+
+    alert("Хариу илгээгдлээ.");
   };
 
-  /* ---------------- ЕРӨӨЛ ---------------- */
+  /* ===================== ЕРӨӨЛ ===================== */
 
   const handleWish = () => {
     if (!wishName.trim() || !wishText.trim()) {
@@ -186,7 +256,7 @@ export default function Home() {
     setWishText("");
   };
 
-  /* ---------------- SHARE ---------------- */
+  /* ===================== SHARE ===================== */
 
   const copyShareLink = async () => {
     const url =
@@ -202,28 +272,34 @@ export default function Home() {
     }
   };
 
-  /* =====================================================
-     НҮҮР
-  ===================================================== */
+  /* ===================== GALLERY SCROLL ===================== */
+
+  const scrollGallery = (direction) => {
+    galleryRef.current?.scrollBy({
+      left: direction * 320,
+      behavior: "smooth",
+    });
+  };
+
+  /* ===================== HOME ===================== */
 
   if (step === "home") {
     return (
       <main style={pageStyle}>
-        <section style={centerStyle}>
-          <div style={{ fontSize: 58 }}>💍</div>
+        <section style={homeStyle}>
+          <div style={{ fontSize: 60 }}>💍</div>
 
-          <h1 style={{ fontSize: 48, marginBottom: 10 }}>
+          <h1 style={{ fontSize: 48, margin: "10px 0" }}>
             Урилга
           </h1>
 
-          <p style={{ fontSize: 20, color: "#777" }}>
+          <p style={{ color: "#777", fontSize: 19 }}>
             Хуримын онлайн урилгаа өөрөө бүтээ
           </p>
 
           <button
-            type="button"
             onClick={() => setStep("form")}
-            style={blackButton}
+            style={primaryButton}
           >
             Урилга бүтээх
           </button>
@@ -232,9 +308,7 @@ export default function Home() {
     );
   }
 
-  /* =====================================================
-     FORM
-  ===================================================== */
+  /* ===================== FORM ===================== */
 
   if (step === "form") {
     return (
@@ -244,7 +318,7 @@ export default function Home() {
             Урилгын мэдээлэл
           </h1>
 
-          <div style={formStyle}>
+          <div style={formGrid}>
             <input
               name="groom"
               value={form.groom}
@@ -261,7 +335,15 @@ export default function Home() {
               style={inputStyle}
             />
 
-            <label style={labelStyle}>
+            <input
+              name="hosts"
+              value={form.hosts}
+              onChange={change}
+              placeholder="Хуримын эзэд"
+              style={inputStyle}
+            />
+
+            <label>
               Хуримын огноо
               <input
                 name="date"
@@ -272,7 +354,7 @@ export default function Home() {
               />
             </label>
 
-            <label style={labelStyle}>
+            <label>
               Цаг
               <input
                 name="time"
@@ -284,10 +366,18 @@ export default function Home() {
             </label>
 
             <input
-              name="venue"
-              value={form.venue}
+              name="venueName"
+              value={form.venueName}
               onChange={change}
-              placeholder="Ресторан / Байршил"
+              placeholder="Хурим болох газрын нэр"
+              style={inputStyle}
+            />
+
+            <input
+              name="venueAddress"
+              value={form.venueAddress}
+              onChange={change}
+              placeholder="Хурим болох газрын хаяг"
               style={inputStyle}
             />
 
@@ -299,126 +389,93 @@ export default function Home() {
               style={inputStyle}
             />
 
-            {/* -------- ШИНЭ ЗУРАГ UPLOAD -------- */}
+            <PhotoPicker
+              title="Нүүр зураг"
+              photo={form.heroPhoto}
+              inputRef={heroInputRef}
+              onChange={handleHeroPhoto}
+              onRemove={removeHeroPhoto}
+            />
 
-            <div style={photoUploadCard}>
-              <div style={photoUploadHeader}>
-                <div>
-                  <div style={photoUploadTitle}>
-                    📷 Хосын зураг
-                  </div>
+            <PhotoPicker
+              title="Байршлын зураг"
+              photo={form.venuePhoto}
+              inputRef={venueInputRef}
+              onChange={handleVenuePhoto}
+              onRemove={removeVenuePhoto}
+            />
 
-                  <div style={photoUploadHint}>
-                    Босоо эсвэл хэвтээ зураг сонгож болно
-                  </div>
-                </div>
+            <div style={uploadCard}>
+              <div style={uploadTitle}>
+                🖼 Дурсамжийн зургууд
+              </div>
+
+              <div style={uploadHint}>
+                5 хүртэл зураг сонгож болно
               </div>
 
               <input
-                ref={fileInputRef}
+                ref={galleryInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handlePhoto}
+                multiple
+                onChange={handleGallery}
                 style={{ display: "none" }}
               />
 
-              {!form.photo ? (
-                <button
-                  type="button"
-                  onClick={openPhotoPicker}
-                  style={choosePhotoButton}
-                >
-                  ＋ Зураг сонгох
-                </button>
-              ) : (
-                <>
-                  <div style={photoPreviewContainer}>
-                    <img
-                      src={form.photo}
-                      alt="Сонгосон зураг"
-                      style={photoPreviewImage}
-                    />
-                  </div>
+              <button
+                type="button"
+                onClick={() =>
+                  galleryInputRef.current?.click()
+                }
+                style={softButton}
+              >
+                ＋ Зургууд сонгох
+              </button>
 
-                  {form.photoName && (
-                    <div style={photoFileName}>
-                      ✓ {form.photoName}
+              {form.gallery.length > 0 && (
+                <div style={galleryEditGrid}>
+                  {form.gallery.map((item) => (
+                    <div
+                      key={item.id}
+                      style={galleryEditItem}
+                    >
+                      <img
+                        src={item.src}
+                        alt=""
+                        style={galleryEditImage}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeGalleryPhoto(item.id)
+                        }
+                        style={miniDelete}
+                      >
+                        ×
+                      </button>
                     </div>
-                  )}
-
-                  <div style={photoActionRow}>
-                    <button
-                      type="button"
-                      onClick={openPhotoPicker}
-                      style={changePhotoButton}
-                    >
-                      ↻ Зураг солих
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={removePhoto}
-                      style={deletePhotoButton}
-                    >
-                      🗑 Зураг арилгах
-                    </button>
-                  </div>
-                </>
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* -------- УРИЛГЫН МЭНДЧИЛГЭЭ -------- */}
-
-            <label style={labelStyle}>
+            <label>
               Урилгын мэндчилгээ
               <textarea
                 name="message"
                 value={form.message}
                 onChange={change}
-                placeholder="Эрхэм хүндэт таныг бидний хуримын баярт..."
+                placeholder="Эрхэм зочид оо..."
                 rows={5}
                 maxLength={800}
                 style={{
                   ...inputStyle,
-                  resize: "vertical",
                   lineHeight: 1.7,
                 }}
               />
             </label>
-
-            <div
-              style={{
-                textAlign: "right",
-                color: "#999",
-                fontSize: 12,
-                marginTop: -10,
-              }}
-            >
-              {form.message.length}/800
-            </div>
-
-            <select
-              name="language"
-              value={form.language}
-              onChange={change}
-              style={inputStyle}
-            >
-              <option>Монгол</option>
-              <option>Қазақша</option>
-            </select>
-
-            <select
-              name="template"
-              value={form.template}
-              onChange={change}
-              style={inputStyle}
-            >
-              <option>Цагаан сонгодог</option>
-              <option>Цэцгэн чимэг</option>
-              <option>Modern 3D</option>
-              <option>Монгол хээ</option>
-              <option>Казах той</option>
-            </select>
 
             <button
               type="button"
@@ -436,99 +493,239 @@ export default function Home() {
     );
   }
 
-  /* =====================================================
-     PREVIEW
-  ===================================================== */
+  /* ===================== PREVIEW ===================== */
 
   return (
-    <main style={previewPage(form.template)}>
-      <section style={previewCard(form.template)}>
-        <TemplateHeader template={form.template} />
+    <main style={previewBackground}>
+      <header style={headerStyle}>
+        <div style={menuIcon}>☰</div>
 
-        <p
-          style={{
-            fontSize: 18,
-            lineHeight: 1.8,
-            opacity: 0.82,
-          }}
-        >
-          Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+        <div style={headerNames}>
+          {names}
+        </div>
+
+        <div style={musicIcon}>♪</div>
+      </header>
+
+      {/* HERO */}
+
+      <section style={heroSection}>
+        {form.heroPhoto ? (
+          <img
+            src={form.heroPhoto}
+            alt="Хосын зураг"
+            style={heroImage}
+          />
+        ) : (
+          <div style={heroPlaceholder}>
+            Хосын нүүр зураг
+          </div>
+        )}
+
+        <div style={heroOverlay} />
+
+        <div style={heroText}>
+          <div style={heroSmall}>
+            ХУРИМЫН УРИЛГА
+          </div>
+
+          <h1 style={heroNames}>
+            {names}
+          </h1>
+
+          <div style={heartLine}>
+            ─── ♥ ───
+          </div>
+        </div>
+      </section>
+
+      {/* МЭНДЧИЛГЭЭ */}
+
+      <section style={invitationMessageSection}>
+        <div style={smallScriptName}>
+          {names}
+        </div>
+
+        <div style={guestTitle}>
+          Эрхэм зочид оо!!
+        </div>
+
+        <p style={messageText}>
+          {message}
         </p>
 
-        <h1 style={namesStyle(form.template)}>
-          {names}
-        </h1>
+        <div style={sparkle}>
+          ✦
+        </div>
+      </section>
 
-        {/* -------- БҮТЭН ЗУРАГ -------- */}
+      {/* ХУРИМЫН ЭЗЭД */}
 
-        {form.photo && (
-          <div style={invitationPhotoFrame}>
-            <img
-              src={form.photo}
-              alt="Хосын зураг"
-              style={invitationPhoto}
+      <section style={hostsSection}>
+        <div style={goldLabel}>
+          ХУРИМЫН ЭЗЭД
+        </div>
+
+        <div style={hostsPill}>
+          {hosts}
+        </div>
+      </section>
+
+      {/* DATE */}
+
+      <section style={infoSection}>
+        <InfoLargeCard
+          icon="▣"
+          label="ОГНОО / DATE"
+          value={date}
+        />
+
+        <InfoLargeCard
+          icon="◷"
+          label="ЦАГ / TIME"
+          value={`${time} ЦАГТ`}
+        />
+      </section>
+
+      {/* VENUE */}
+
+      <section style={venueCard}>
+        {form.venuePhoto && (
+          <img
+            src={form.venuePhoto}
+            alt="Байршил"
+            style={venueImage}
+          />
+        )}
+
+        <div style={venueContent}>
+          <div style={venueLabel}>
+            ★ БАЙРШИЛ / VENUE
+          </div>
+
+          <div style={venueTitle}>
+            {venueName}
+          </div>
+
+          <div style={venueAddressStyle}>
+            {venueAddress}
+          </div>
+
+          {form.mapUrl && (
+            <a
+              href={form.mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={mapButton}
+            >
+              📍 ГАЗРЫН ЗУРГААС ХАРАХ
+            </a>
+          )}
+        </div>
+      </section>
+
+      {/* COUNTDOWN */}
+
+      <section style={countdownSection}>
+        <div style={goldLabel}>
+          ХУРИМ ХҮРТЭЛ
+        </div>
+
+        {!targetDate ? (
+          <p>Хуримын огноогоо сонгоно уу.</p>
+        ) : countdown.finished ? (
+          <div style={weddingToday}>
+            ӨНӨӨДӨР БИДНИЙ ХУРИМЫН ӨДӨР ♥
+          </div>
+        ) : (
+          <div style={countdownGrid}>
+            <CountdownBox
+              value={countdown.days}
+              label="Өдөр"
+            />
+            <CountdownBox
+              value={countdown.hours}
+              label="Цаг"
+            />
+            <CountdownBox
+              value={countdown.minutes}
+              label="Минут"
+            />
+            <CountdownBox
+              value={countdown.seconds}
+              label="Секунд"
             />
           </div>
         )}
+      </section>
 
-        <div style={infoGrid}>
-          <InfoBox title="Огноо" value={date} />
-          <InfoBox title="Цаг" value={time} />
-          <InfoBox title="Байршил" value={venue} />
-        </div>
+      {/* GALLERY */}
 
-        {/* -------- МЭНДЧИЛГЭЭНИЙ CARD -------- */}
+      {form.gallery.length > 0 && (
+        <section style={gallerySection}>
+          <div style={galleryHeader}>
+            <div>
+              <div style={goldLabel}>
+                БИДНИЙ ТҮҮХ
+              </div>
 
-        <section style={greetingCard(form.template)}>
-          <div style={greetingDecoration}>
-            ✦
+              <div style={galleryTitle}>
+                Хуримын дурсамжууд
+              </div>
+            </div>
+
+            <div style={galleryButtons}>
+              <button
+                onClick={() =>
+                  scrollGallery(-1)
+                }
+                style={circleButton}
+              >
+                ‹
+              </button>
+
+              <button
+                onClick={() =>
+                  scrollGallery(1)
+                }
+                style={circleButton}
+              >
+                ›
+              </button>
+            </div>
           </div>
 
-          <div style={greetingTitle}>
-            УРИЛГЫН МЭНДЧИЛГЭЭ
-          </div>
-
-          <div style={greetingLine} />
-
-          <p style={greetingText}>
-            {message}
-          </p>
-
-          <div style={greetingBottom}>
-            ❦
+          <div
+            ref={galleryRef}
+            style={galleryScroller}
+          >
+            {form.gallery.map((item) => (
+              <img
+                key={item.id}
+                src={item.src}
+                alt=""
+                style={galleryPhoto}
+              />
+            ))}
           </div>
         </section>
+      )}
 
-        {/* -------- COUNTDOWN -------- */}
+      {/* RSVP */}
 
-        <CountdownBlock
-          countdown={countdown}
-          hasDate={!!targetDate}
-        />
+      <section style={rsvpSection}>
+        <div style={rsvpCard}>
+          <div style={rsvpTitle}>
+            RSVP
+          </div>
 
-        {/* -------- GOOGLE MAPS -------- */}
-
-        {form.mapUrl && (
-          <a
-            href={form.mapUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={mapButton}
-          >
-            📍 Google Maps дээр харах
-          </a>
-        )}
-
-        {/* -------- RSVP -------- */}
-
-        <section style={sectionCard}>
-          <h2 style={sectionTitle}>
-            Хүрэлцэн ирэх эсэх
-          </h2>
-
-          <p style={sectionSub}>
-            Та хуримын баярт хүрэлцэн ирэх эсэхээ мэдэгдэнэ үү.
+          <p style={rsvpIntro}>
+            Таны ирэх нь бидний хувьд том хүндэтгэл!
           </p>
+
+          <div style={fieldLabel}>
+            НЭРЭЭ БИЧНЭ ҮҮ
+          </div>
 
           <input
             value={rsvpName}
@@ -536,50 +733,97 @@ export default function Home() {
               setRsvpName(e.target.value)
             }
             placeholder="Таны нэр"
-            style={inputStyle}
+            style={bigInput}
           />
 
-          <select
-            value={rsvpStatus}
-            onChange={(e) =>
-              setRsvpStatus(e.target.value)
-            }
-            style={inputStyle}
-          >
-            <option>Ирнэ</option>
-            <option>Ирэхгүй</option>
-            <option>Одоогоор мэдэхгүй</option>
-          </select>
+          <div style={fieldLabel}>
+            ХУРИМД ИРЭХ ҮҮ?
+          </div>
+
+          {[
+            ["Ирнэ", "Хуримд оролцоно"],
+            [
+              "Одоогоор мэдэхгүй",
+              "Одоохондоо тодорхойгүй",
+            ],
+            [
+              "Ирэхгүй",
+              "Оролцох боломжгүй",
+            ],
+          ].map(([value, sub]) => (
+            <label
+              key={value}
+              style={radioCard}
+            >
+              <input
+                type="radio"
+                name="rsvp"
+                value={value}
+                checked={
+                  rsvpStatus === value
+                }
+                onChange={(e) =>
+                  setRsvpStatus(
+                    e.target.value
+                  )
+                }
+              />
+
+              <div>
+                <div style={radioTitle}>
+                  {value}
+                </div>
+
+                <div style={radioSub}>
+                  {sub}
+                </div>
+              </div>
+            </label>
+          ))}
 
           <button
-            type="button"
             onClick={handleRsvp}
-            style={greenButton}
+            style={sendButton}
           >
-            Илгээх
+            ИЛГЭЭХ
           </button>
+        </div>
+      </section>
 
-          {rsvps.length > 0 && (
-            <div style={{ marginTop: 20 }}>
-              {rsvps.map((item) => (
-                <div
-                  key={item.id}
-                  style={smallCard}
-                >
-                  <strong>{item.name}</strong>
-                  <span>{item.status}</span>
+      {/* WISHES */}
+
+      <section style={wishSection}>
+        <div style={wishHeading}>
+          ♥ ЕРӨӨЛ ҮЛДЭЭХ ♥
+        </div>
+
+        {wishes.length > 0 && (
+          <div style={wishList}>
+            {wishes.map((wish) => (
+              <div
+                key={wish.id}
+                style={wishDisplayCard}
+              >
+                <div style={quoteMark}>
+                  ”
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
 
-        {/* -------- ЕРӨӨЛ -------- */}
+                <div style={wishDisplayText}>
+                  “{wish.text}”
+                </div>
 
-        <section style={sectionCard}>
-          <h2 style={sectionTitle}>
-            Ерөөлөө бичнэ үү
-          </h2>
+                <div style={wishAuthor}>
+                  — {wish.name} —
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={wishFormCard}>
+          <div style={fieldLabel}>
+            ЕРӨӨЛӨӨ БИЧНЭ ҮҮ
+          </div>
 
           <input
             value={wishName}
@@ -587,7 +831,7 @@ export default function Home() {
               setWishName(e.target.value)
             }
             placeholder="Таны нэр..."
-            style={inputStyle}
+            style={underlineInput}
           />
 
           <textarea
@@ -595,968 +839,911 @@ export default function Home() {
             onChange={(e) =>
               setWishText(e.target.value)
             }
-            placeholder="Залуу гэр бүлд зориулсан дулаан ерөөл, хүсэлтээ бичнэ үү..."
+            placeholder="Залуу гэр бүлд дулаан ерөөл, хүсэлтээ бичнэ үү..."
             maxLength={500}
             rows={5}
-            style={{
-              ...inputStyle,
-              resize: "vertical",
-              lineHeight: 1.7,
-            }}
+            style={wishTextarea}
           />
 
-          <div
-            style={{
-              textAlign: "right",
-              color: "#888",
-              fontSize: 13,
-            }}
-          >
+          <div style={characterCount}>
             {wishText.length}/500
           </div>
 
           <button
-            type="button"
             onClick={handleWish}
-            style={greenButton}
+            style={sendButton}
           >
-            ▷ Илгээх
+            ▷ ИЛГЭЭХ
           </button>
+        </div>
+      </section>
 
-          {wishes.length > 0 && (
-            <div style={{ marginTop: 20 }}>
-              {wishes.map((wish) => (
-                <div
-                  key={wish.id}
-                  style={wishCard}
-                >
-                  <strong>{wish.name}</strong>
+      {/* SHARE */}
 
-                  <p
-                    style={{
-                      lineHeight: 1.7,
-                      marginBottom: 0,
-                    }}
-                  >
-                    {wish.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+      <section style={shareSection}>
+        <div style={goldLabel}>
+          УРИЛГЫН ЛИНК
+        </div>
 
-        {/* -------- SHARE -------- */}
-
-        <section style={sectionCard}>
-          <h2 style={sectionTitle}>
-            Урилгын линк
-          </h2>
-
-          <p style={sectionSub}>
-            Энэ линкийг зочдод илгээж болно.
-          </p>
-
-          <div style={shareCode}>
-            invite={shareId}
-          </div>
-
-          <button
-            type="button"
-            onClick={copyShareLink}
-            style={shareButton}
-          >
-            🔗 Линк хуулах
-          </button>
-        </section>
+        <div style={shareIdStyle}>
+          invite={shareId}
+        </div>
 
         <button
-          type="button"
-          onClick={() => setStep("form")}
-          style={blackButton}
+          onClick={copyShareLink}
+          style={mapButton}
+        >
+          🔗 ЛИНК ХУУЛАХ
+        </button>
+      </section>
+
+      {/* FOOTER */}
+
+      <footer style={footerStyle}>
+        <p style={footerQuote}>
+          Хайрлаж явъя гэж харин бид өөрсдөө шийдсэн
+        </p>
+
+        <div style={footerHeart}>
+          ♥
+        </div>
+
+        <div style={footerNames}>
+          {names}
+        </div>
+
+        <div style={copyright}>
+          © 2026 {names}. ХАЙРААР БҮТЭЭВ.
+        </div>
+
+        <button
+          onClick={() => {
+            setStep("form");
+            window.scrollTo(0, 0);
+          }}
+          style={editButton}
         >
           ← Засах
         </button>
-      </section>
+      </footer>
     </main>
   );
 }
 
-/* =====================================================
-   COMPONENTS
-===================================================== */
+/* ===================== COMPONENTS ===================== */
 
-function TemplateHeader({ template }) {
-  if (template === "Цэцгэн чимэг") {
-    return (
-      <>
-        <div style={{ fontSize: 30 }}>
-          🌸 🌿 🌷 🌿 🌸
-        </div>
-
-        <p
-          style={{
-            letterSpacing: 4,
-            color: "#a85f76",
-          }}
-        >
-          ХАЙРЫН БАЯР
-        </p>
-      </>
-    );
-  }
-
-  if (template === "Modern 3D") {
-    return (
-      <>
-        <div style={{ fontSize: 46 }}>
-          💎
-        </div>
-
-        <p
-          style={{
-            letterSpacing: 4,
-            color: "#6870c8",
-          }}
-        >
-          MODERN WEDDING
-        </p>
-      </>
-    );
-  }
-
-  if (template === "Монгол хээ") {
-    return (
-      <>
-        <div style={mongolPattern}>
-          ◆ ◈ ◆ ◈ ◆ ◈ ◆
-        </div>
-
-        <p
-          style={{
-            letterSpacing: 3,
-            color: "#9b7627",
-          }}
-        >
-          МОНГОЛ ХУРИМЫН УРИЛГА
-        </p>
-      </>
-    );
-  }
-
-  if (template === "Казах той") {
-    return (
-      <>
-        <div style={kazakhPattern}>
-          ✦ ❖ ✦ ❖ ✦ ❖ ✦
-        </div>
-
-        <p
-          style={{
-            letterSpacing: 3,
-            color: "#c49b3e",
-          }}
-        >
-          ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ
-        </p>
-      </>
-    );
-  }
-
-  return (
-    <p
-      style={{
-        letterSpacing: 4,
-        color: "#a48354",
-      }}
-    >
-      WEDDING INVITATION
-    </p>
-  );
-}
-
-function CountdownBlock({
-  countdown,
-  hasDate,
+function PhotoPicker({
+  title,
+  photo,
+  inputRef,
+  onChange,
+  onRemove,
 }) {
-  if (!hasDate) {
-    return (
-      <section style={sectionCard}>
-        <h2 style={sectionTitle}>
-          Хурим хүртэл
-        </h2>
-
-        <p>
-          Хуримын огноогоо сонгоно уу.
-        </p>
-      </section>
-    );
-  }
-
-  if (countdown.finished) {
-    return (
-      <section style={sectionCard}>
-        <h2 style={sectionTitle}>
-          Хуримын өдөр ирлээ 🎉
-        </h2>
-      </section>
-    );
-  }
-
   return (
-    <section style={sectionCard}>
-      <h2 style={sectionTitle}>
-        Хурим хүртэл
-      </h2>
-
-      <div style={countdownGrid}>
-        <CountBox
-          label="Өдөр"
-          value={countdown.days}
-        />
-
-        <CountBox
-          label="Цаг"
-          value={countdown.hours}
-        />
-
-        <CountBox
-          label="Минут"
-          value={countdown.minutes}
-        />
-
-        <CountBox
-          label="Секунд"
-          value={countdown.seconds}
-        />
+    <div style={uploadCard}>
+      <div style={uploadTitle}>
+        📷 {title}
       </div>
-    </section>
+
+      <div style={uploadHint}>
+        Босоо эсвэл хэвтээ зураг сонгож болно
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={onChange}
+        style={{ display: "none" }}
+      />
+
+      {!photo ? (
+        <button
+          type="button"
+          onClick={() =>
+            inputRef.current?.click()
+          }
+          style={softButton}
+        >
+          ＋ Зураг сонгох
+        </button>
+      ) : (
+        <>
+          <div style={photoPreviewBox}>
+            <img
+              src={photo}
+              alt=""
+              style={photoPreview}
+            />
+          </div>
+
+          <div style={photoButtons}>
+            <button
+              type="button"
+              onClick={() =>
+                inputRef.current?.click()
+              }
+              style={changeButton}
+            >
+              ↻ Зураг солих
+            </button>
+
+            <button
+              type="button"
+              onClick={onRemove}
+              style={deleteButton}
+            >
+              Зураг арилгах
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
-function CountBox({ label, value }) {
+function InfoLargeCard({
+  icon,
+  label,
+  value,
+}) {
   return (
-    <div style={countBox}>
-      <strong style={{ fontSize: 26 }}>
-        {value}
-      </strong>
+    <div style={infoLargeCard}>
+      <div style={infoIcon}>
+        {icon}
+      </div>
 
-      <span
-        style={{
-          fontSize: 12,
-          color: "#777",
-        }}
-      >
+      <div style={infoLabel}>
         {label}
-      </span>
-    </div>
-  );
-}
-
-function InfoBox({ title, value }) {
-  return (
-    <div style={infoBox}>
-      <div
-        style={{
-          fontSize: 12,
-          color: "#777",
-          marginBottom: 6,
-          textTransform: "uppercase",
-          letterSpacing: 1,
-        }}
-      >
-        {title}
       </div>
 
-      <strong>{value}</strong>
+      <div style={infoValue}>
+        {value}
+      </div>
     </div>
   );
 }
 
-/* =====================================================
-   TEMPLATE STYLES
-===================================================== */
+function CountdownBox({
+  value,
+  label,
+}) {
+  return (
+    <div style={countdownBox}>
+      <div style={countdownValue}>
+        {String(value).padStart(2, "0")}
+      </div>
 
-function previewPage(template) {
-  const backgrounds = {
-    "Цагаан сонгодог":
-      "linear-gradient(180deg,#f7f3ed,#eee7dc)",
-
-    "Цэцгэн чимэг":
-      "linear-gradient(135deg,#fff8fa,#fffdfb,#f8eef2)",
-
-    "Modern 3D":
-      "linear-gradient(135deg,#ccecff,#e6dcff,#ffe2ec)",
-
-    "Монгол хээ":
-      "linear-gradient(135deg,#4a0d0a,#851d18,#4a0d0a)",
-
-    "Казах той":
-      "linear-gradient(135deg,#062b54,#0e608f,#062b54)",
-  };
-
-  return {
-    minHeight: "100vh",
-    padding: "40px 16px",
-
-    background:
-      backgrounds[template] ||
-      backgrounds["Цагаан сонгодог"],
-
-    fontFamily:
-      template === "Modern 3D"
-        ? "Arial, sans-serif"
-        : "Georgia, serif",
-  };
+      <div style={countdownLabel}>
+        {label}
+      </div>
+    </div>
+  );
 }
 
-function previewCard(template) {
-  const styles = {
-    "Цагаан сонгодог": {
-      background: "#fff",
-      border: "1px solid #c9b08a",
-    },
+/* ===================== STYLES ===================== */
 
-    "Цэцгэн чимэг": {
-      background:
-        "linear-gradient(180deg,#fff,#fff7fa)",
-
-      border: "1px solid #efc8d2",
-    },
-
-    "Modern 3D": {
-      background:
-        "rgba(255,255,255,0.68)",
-
-      border:
-        "1px solid rgba(255,255,255,0.85)",
-
-      backdropFilter: "blur(18px)",
-    },
-
-    "Монгол хээ": {
-      background: "#fff4d7",
-      border: "5px double #c99a32",
-    },
-
-    "Казах той": {
-      background: "#f5fbff",
-      border: "5px double #d2ae56",
-    },
-  };
-
-  return {
-    maxWidth: 760,
-    margin: "0 auto",
-
-    padding: "50px 28px",
-
-    textAlign: "center",
-
-    borderRadius: 28,
-
-    boxShadow:
-      "0 24px 70px rgba(0,0,0,0.16)",
-
-    ...styles[template],
-  };
-}
-
-function namesStyle(template) {
-  const colors = {
-    "Цагаан сонгодог": "#6c5135",
-    "Цэцгэн чимэг": "#b85f7c",
-    "Modern 3D": "#625fb1",
-    "Монгол хээ": "#8d2019",
-    "Казах той": "#0b5a87",
-  };
-
-  return {
-    fontSize:
-      "clamp(42px, 7vw, 60px)",
-
-    margin: "24px 0",
-
-    color:
-      colors[template] || "#333",
-  };
-}
-
-function greetingCard(template) {
-  const cards = {
-    "Цагаан сонгодог": {
-      background:
-        "linear-gradient(180deg,#fffdf9,#faf5ec)",
-
-      border: "1px solid #d7c29f",
-    },
-
-    "Цэцгэн чимэг": {
-      background:
-        "linear-gradient(180deg,#fffafb,#fff2f6)",
-
-      border: "1px solid #edc7d2",
-    },
-
-    "Modern 3D": {
-      background:
-        "rgba(255,255,255,0.65)",
-
-      border:
-        "1px solid rgba(255,255,255,0.9)",
-    },
-
-    "Монгол хээ": {
-      background: "#fff8df",
-      border: "2px solid #c99a32",
-    },
-
-    "Казах той": {
-      background: "#f8fcff",
-      border: "2px solid #d2ae56",
-    },
-  };
-
-  return {
-    maxWidth: 600,
-
-    margin: "34px auto",
-
-    padding: "34px 26px",
-
-    borderRadius: 24,
-
-    boxShadow:
-      "0 12px 36px rgba(0,0,0,0.08)",
-
-    ...cards[template],
-  };
-}
-
-/* =====================================================
-   COMMON STYLES
-===================================================== */
+const cream = "#fbf7f2";
+const green = "#063f2d";
+const gold = "#b58c19";
+const softGreen = "#9eac9f";
 
 const pageStyle = {
   minHeight: "100vh",
-
-  background:
-    "linear-gradient(180deg,#fffaf7,#f5ebe5)",
-
+  background: "#f7efe9",
   fontFamily: "Arial, sans-serif",
-
-  padding: 24,
+  padding: 20,
 };
 
-const centerStyle = {
+const homeStyle = {
+  paddingTop: 130,
   textAlign: "center",
-  paddingTop: 120,
 };
 
 const formCard = {
-  maxWidth: 680,
-
-  margin: "40px auto",
-
+  maxWidth: 720,
+  margin: "30px auto",
   background: "#fff",
-
-  padding: 30,
-
-  borderRadius: 22,
-
+  borderRadius: 24,
+  padding: 28,
   boxShadow:
-    "0 10px 40px rgba(0,0,0,0.08)",
+    "0 15px 45px rgba(0,0,0,.08)",
 };
 
-const formStyle = {
+const formGrid = {
   display: "grid",
-  gap: 16,
-  marginTop: 30,
-};
-
-const labelStyle = {
-  display: "block",
-  fontSize: 15,
-  color: "#555",
+  gap: 18,
 };
 
 const inputStyle = {
   width: "100%",
-
   boxSizing: "border-box",
-
-  padding: 14,
-
-  borderRadius: 12,
-
   border: "1px solid #ddd",
-
+  borderRadius: 14,
+  padding: 15,
   fontSize: 16,
-
   marginTop: 6,
-
-  background: "#fff",
 };
 
-/* -------- PHOTO UPLOAD -------- */
-
-const photoUploadCard = {
-  padding: 20,
-
-  borderRadius: 20,
-
-  border: "1px solid #eaded7",
-
-  background:
-    "linear-gradient(180deg,#fffdfb,#faf7f3)",
-
-  boxShadow:
-    "0 8px 24px rgba(0,0,0,0.04)",
-};
-
-const photoUploadHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: 16,
-};
-
-const photoUploadTitle = {
-  fontSize: 17,
-  fontWeight: 700,
-  color: "#554941",
-};
-
-const photoUploadHint = {
-  marginTop: 5,
-  fontSize: 13,
-  color: "#999",
-};
-
-const choosePhotoButton = {
-  width: "100%",
-
-  padding: "16px 20px",
-
-  borderRadius: 16,
-
-  border: "1px dashed #c997a4",
-
-  background: "#fff7f9",
-
-  color: "#a45f72",
-
-  fontWeight: 700,
-
-  fontSize: 16,
-
-  cursor: "pointer",
-};
-
-const photoPreviewContainer = {
-  width: "100%",
-
-  display: "flex",
-
-  alignItems: "center",
-
-  justifyContent: "center",
-
-  background: "#f3f0ed",
-
-  borderRadius: 18,
-
-  overflow: "hidden",
-
-  padding: 10,
-
-  boxSizing: "border-box",
-};
-
-const photoPreviewImage = {
-  display: "block",
-
-  width: "100%",
-
-  height: "auto",
-
-  maxHeight: 560,
-
-  objectFit: "contain",
-
-  borderRadius: 14,
-
-  margin: "0 auto",
-};
-
-const photoFileName = {
-  padding: "10px 4px 2px",
-
-  fontSize: 13,
-
-  color: "#777",
-
-  overflow: "hidden",
-
-  textOverflow: "ellipsis",
-
-  whiteSpace: "nowrap",
-};
-
-const photoActionRow = {
-  display: "grid",
-
-  gridTemplateColumns:
-    "repeat(2,minmax(0,1fr))",
-
-  gap: 10,
-
-  marginTop: 14,
-};
-
-const changePhotoButton = {
-  padding: 13,
-
-  borderRadius: 12,
-
-  border: "1px solid #c8b7ad",
-
-  background: "#fff",
-
-  color: "#66564e",
-
-  fontWeight: 700,
-
-  cursor: "pointer",
-};
-
-const deletePhotoButton = {
-  padding: 13,
-
-  borderRadius: 12,
-
-  border: "1px solid #ecc9c9",
-
-  background: "#fff5f5",
-
-  color: "#a54f4f",
-
-  fontWeight: 700,
-
-  cursor: "pointer",
-};
-
-/* -------- PREVIEW PHOTO -------- */
-
-const invitationPhotoFrame = {
-  width: "100%",
-
-  maxWidth: 620,
-
-  margin: "24px auto 32px",
-
-  padding: 10,
-
-  boxSizing: "border-box",
-
-  borderRadius: 26,
-
-  background:
-    "rgba(255,255,255,0.56)",
-
-  boxShadow:
-    "0 18px 45px rgba(0,0,0,0.10)",
-};
-
-const invitationPhoto = {
-  display: "block",
-
-  width: "100%",
-
-  height: "auto",
-
-  maxHeight: 760,
-
-  objectFit: "contain",
-
-  margin: "0 auto",
-
-  borderRadius: 20,
-};
-
-/* -------- GREETING -------- */
-
-const greetingDecoration = {
-  fontSize: 22,
-  color: "#b7996c",
-};
-
-const greetingTitle = {
-  marginTop: 12,
-
-  fontSize: 13,
-
-  fontWeight: 700,
-
-  letterSpacing: 3,
-
-  color: "#8a7357",
-};
-
-const greetingLine = {
-  width: 70,
-
-  height: 1,
-
-  margin: "18px auto",
-
-  background: "#cdb892",
-};
-
-const greetingText = {
-  maxWidth: 520,
-
-  margin: "0 auto",
-
-  fontSize: 18,
-
-  lineHeight: 1.9,
-
-  color: "#554f49",
-};
-
-const greetingBottom = {
-  marginTop: 20,
-
-  fontSize: 24,
-
-  color: "#b7996c",
-};
-
-/* -------- BUTTONS -------- */
-
-const blackButton = {
-  marginTop: 24,
-
+const primaryButton = {
   border: "none",
-
-  borderRadius: 14,
-
-  padding: "15px 28px",
-
+  background: green,
+  color: "white",
+  borderRadius: 999,
+  padding: "15px 30px",
   fontSize: 17,
-
-  background: "#222",
-
-  color: "#fff",
-
   cursor: "pointer",
+  marginTop: 25,
 };
 
 const pinkButton = {
-  border: "none",
-
-  borderRadius: 14,
-
-  padding: 16,
-
-  fontSize: 18,
-
-  background:
-    "linear-gradient(90deg,#bd7c87,#d18a98)",
-
-  color: "#fff",
-
-  cursor: "pointer",
-
-  boxShadow:
-    "0 9px 24px rgba(180,110,130,0.20)",
-};
-
-const greenButton = {
+  ...primaryButton,
   width: "100%",
-
-  marginTop: 12,
-
-  border: "none",
-
-  borderRadius: 999,
-
-  padding: 14,
-
-  background: "#9cab9b",
-
-  color: "#fff",
-
-  fontSize: 17,
-
-  cursor: "pointer",
-};
-
-const mapButton = {
-  display: "inline-block",
-
-  margin: "14px auto 30px",
-
-  padding: "14px 22px",
-
-  borderRadius: 999,
-
-  background: "#456b57",
-
-  color: "#fff",
-
-  textDecoration: "none",
-
-  fontWeight: 700,
-};
-
-const shareButton = {
-  ...greenButton,
-  background: "#5c6f8c",
-};
-
-/* -------- CARDS -------- */
-
-const shareCode = {
-  background: "#f4f4f4",
-
-  padding: 12,
-
-  borderRadius: 12,
-
-  fontFamily: "monospace",
-
-  marginBottom: 10,
-
-  wordBreak: "break-all",
-};
-
-const sectionCard = {
-  margin: "30px auto",
-
-  padding: 24,
-
-  maxWidth: 620,
-
-  borderRadius: 22,
-
   background:
-    "rgba(255,255,255,0.72)",
+    "linear-gradient(90deg,#bd7b87,#d6949e)",
+};
 
-  border:
-    "1px solid rgba(150,150,150,0.18)",
+const uploadCard = {
+  border: "1px solid #e6ddd4",
+  borderRadius: 22,
+  padding: 20,
+  background: "#fffdf9",
+};
 
+const uploadTitle = {
+  fontWeight: 700,
+  fontSize: 17,
+  color: green,
+};
+
+const uploadHint = {
+  color: "#999",
+  fontSize: 13,
+  margin: "5px 0 15px",
+};
+
+const softButton = {
+  width: "100%",
+  padding: 15,
+  borderRadius: 14,
+  border: "1px dashed #b69b7e",
+  background: "#fff8ef",
+  cursor: "pointer",
+  fontSize: 16,
+};
+
+const photoPreviewBox = {
+  width: "100%",
+  marginTop: 12,
+  background: "#f4f1ed",
+  borderRadius: 18,
+  padding: 8,
   boxSizing: "border-box",
 };
 
-const sectionTitle = {
-  marginTop: 0,
-  marginBottom: 10,
+const photoPreview = {
+  width: "100%",
+  height: "auto",
+  maxHeight: 550,
+  objectFit: "contain",
+  display: "block",
+  borderRadius: 14,
 };
 
-const sectionSub = {
-  color: "#666",
-  lineHeight: 1.6,
-};
-
-const infoGrid = {
+const photoButtons = {
   display: "grid",
-
-  gridTemplateColumns:
-    "repeat(auto-fit,minmax(150px,1fr))",
-
-  gap: 14,
-
-  margin: "30px 0",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 10,
+  marginTop: 12,
 };
 
-const infoBox = {
-  padding: 18,
+const changeButton = {
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid #ccc",
+  background: "white",
+  cursor: "pointer",
+};
 
-  borderRadius: 18,
+const deleteButton = {
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid #e6c3c3",
+  background: "#fff5f5",
+  color: "#9d4646",
+  cursor: "pointer",
+};
 
+const galleryEditGrid = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(100px,1fr))",
+  gap: 10,
+  marginTop: 15,
+};
+
+const galleryEditItem = {
+  position: "relative",
+};
+
+const galleryEditImage = {
+  width: "100%",
+  height: 120,
+  objectFit: "cover",
+  borderRadius: 12,
+};
+
+const miniDelete = {
+  position: "absolute",
+  top: 5,
+  right: 5,
+  width: 28,
+  height: 28,
+  border: "none",
+  borderRadius: "50%",
+  background: "rgba(0,0,0,.65)",
+  color: "white",
+  cursor: "pointer",
+};
+
+/* PREVIEW */
+
+const previewBackground = {
+  minHeight: "100vh",
+  background: cream,
+  color: green,
+  fontFamily: "Georgia, serif",
+};
+
+const headerStyle = {
+  height: 84,
+  background: "rgba(251,247,242,.96)",
+  display: "grid",
+  gridTemplateColumns: "70px 1fr 70px",
+  alignItems: "center",
+  position: "sticky",
+  top: 0,
+  zIndex: 50,
+  borderBottom: "1px solid #eee6dd",
+};
+
+const menuIcon = {
+  fontSize: 30,
+  textAlign: "center",
+};
+
+const musicIcon = {
+  fontSize: 28,
+  textAlign: "center",
+};
+
+const headerNames = {
+  textAlign: "center",
+  fontSize: "clamp(24px,5vw,36px)",
+  fontStyle: "italic",
+};
+
+const heroSection = {
+  position: "relative",
+  width: "100%",
+  minHeight: 620,
+  overflow: "hidden",
+  background: "#ddd",
+};
+
+const heroImage = {
+  width: "100%",
+  height: 700,
+  display: "block",
+  objectFit: "cover",
+};
+
+const heroPlaceholder = {
+  height: 650,
+  display: "grid",
+  placeItems: "center",
   background:
-    "rgba(255,255,255,0.75)",
+    "linear-gradient(180deg,#cfc5bd,#eee6dd)",
+  color: "#777",
+};
 
-  boxShadow:
-    "0 8px 22px rgba(0,0,0,0.08)",
+const heroOverlay = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "linear-gradient(to bottom,rgba(0,0,0,.05) 25%,rgba(251,247,242,.15) 55%,#fbf7f2 100%)",
+};
+
+const heroText = {
+  position: "absolute",
+  left: 20,
+  right: 20,
+  bottom: 70,
+  textAlign: "center",
+};
+
+const heroSmall = {
+  letterSpacing: 5,
+  color: gold,
+  fontWeight: 700,
+  fontSize: 14,
+};
+
+const heroNames = {
+  margin: "18px 0",
+  fontSize: "clamp(44px,9vw,76px)",
+  fontStyle: "italic",
+  fontWeight: 500,
+  color: green,
+};
+
+const heartLine = {
+  color: "#d7aa2c",
+  letterSpacing: 5,
+};
+
+const invitationMessageSection = {
+  padding: "85px 25px",
+  maxWidth: 800,
+  margin: "0 auto",
+  textAlign: "center",
+};
+
+const smallScriptName = {
+  fontStyle: "italic",
+  fontSize: "clamp(28px,5vw,40px)",
+  marginBottom: 35,
+};
+
+const guestTitle = {
+  fontStyle: "italic",
+  fontSize: 22,
+  marginBottom: 25,
+};
+
+const messageText = {
+  fontSize: "clamp(18px,3vw,25px)",
+  lineHeight: 1.9,
+  color: "#555",
+  fontStyle: "italic",
+};
+
+const sparkle = {
+  marginTop: 45,
+  fontSize: 35,
+  color: "#d8ae2a",
+};
+
+const hostsSection = {
+  background: "#fbf1ea",
+  textAlign: "center",
+  padding: "75px 20px",
+};
+
+const goldLabel = {
+  letterSpacing: 5,
+  color: "#8e7000",
+  fontWeight: 700,
+  fontFamily: "Arial, sans-serif",
+  fontSize: 14,
+};
+
+const hostsPill = {
+  maxWidth: 560,
+  margin: "30px auto 0",
+  padding: "25px 20px",
+  borderRadius: 999,
+  border: "1px solid #d8c9ae",
+  fontSize: "clamp(26px,5vw,40px)",
+  fontStyle: "italic",
+};
+
+const infoSection = {
+  maxWidth: 760,
+  margin: "0 auto",
+  padding: "75px 25px 30px",
+  display: "grid",
+  gap: 28,
+};
+
+const infoLargeCard = {
+  border: "1px solid #d9cbb2",
+  padding: "45px 20px",
+  textAlign: "center",
+  background: "#fffaf6",
+};
+
+const infoIcon = {
+  color: "#8b7000",
+  fontSize: 42,
+  marginBottom: 18,
+};
+
+const infoLabel = {
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
+  letterSpacing: 4,
+  fontSize: 14,
+};
+
+const infoValue = {
+  marginTop: 20,
+  fontSize: "clamp(25px,5vw,36px)",
+};
+
+const venueCard = {
+  maxWidth: 760,
+  margin: "20px auto 80px",
+  border: "1px solid #d8c9ae",
+  padding: 28,
+  boxSizing: "border-box",
+};
+
+const venueImage = {
+  width: "100%",
+  maxHeight: 430,
+  objectFit: "cover",
+  borderRadius: 24,
+  display: "block",
+};
+
+const venueContent = {
+  padding: "35px 15px 10px",
+};
+
+const venueLabel = {
+  fontFamily: "Arial, sans-serif",
+  letterSpacing: 4,
+  fontWeight: 700,
+  fontSize: 14,
+};
+
+const venueTitle = {
+  marginTop: 25,
+  fontSize: "clamp(30px,6vw,45px)",
+  fontStyle: "italic",
+};
+
+const venueAddressStyle = {
+  marginTop: 15,
+  fontSize: 21,
+  fontStyle: "italic",
+  color: "#555",
+};
+
+const mapButton = {
+  display: "block",
+  width: "100%",
+  boxSizing: "border-box",
+  marginTop: 30,
+  padding: "18px 20px",
+  background: green,
+  color: "#f6d577",
+  textDecoration: "none",
+  textAlign: "center",
+  border: "1px solid #d4ad25",
+  borderRadius: 999,
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
+  letterSpacing: 3,
+  cursor: "pointer",
+};
+
+const countdownSection = {
+  maxWidth: 760,
+  margin: "0 auto",
+  padding: "50px 20px 90px",
+  textAlign: "center",
 };
 
 const countdownGrid = {
   display: "grid",
-
-  gridTemplateColumns:
-    "repeat(4,minmax(0,1fr))",
-
-  gap: 8,
-
-  marginTop: 16,
-};
-
-const countBox = {
-  display: "grid",
-
-  gap: 4,
-
-  padding: "14px 5px",
-
-  borderRadius: 16,
-
-  background: "#fff",
-
-  boxShadow:
-    "0 6px 18px rgba(0,0,0,0.06)",
-};
-
-const smallCard = {
-  display: "flex",
-
-  justifyContent: "space-between",
-
+  gridTemplateColumns: "repeat(4,1fr)",
   gap: 10,
+  marginTop: 35,
+};
 
-  padding: 12,
+const countdownBox = {
+  background: "#fff",
+  padding: "20px 5px",
+  borderRadius: 18,
+  boxShadow:
+    "0 8px 25px rgba(0,0,0,.06)",
+};
 
-  marginBottom: 8,
+const countdownValue = {
+  fontSize: "clamp(28px,6vw,48px)",
+  fontWeight: 700,
+};
 
-  borderRadius: 12,
+const countdownLabel = {
+  marginTop: 7,
+  color: "#777",
+  fontFamily: "Arial, sans-serif",
+  fontSize: 12,
+};
 
+const weddingToday = {
+  marginTop: 30,
+  fontSize: 25,
+  color: green,
+};
+
+const gallerySection = {
+  padding: "75px 0 90px",
   background: "#fff",
 };
 
-const wishCard = {
-  textAlign: "left",
+const galleryHeader = {
+  padding: "0 35px 30px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "end",
+  gap: 15,
+};
 
-  padding: 16,
+const galleryTitle = {
+  marginTop: 10,
+  fontSize: "clamp(30px,6vw,45px)",
+  fontStyle: "italic",
+};
 
-  marginBottom: 12,
+const galleryButtons = {
+  display: "flex",
+  gap: 10,
+};
 
+const circleButton = {
+  width: 54,
+  height: 54,
+  borderRadius: "50%",
+  border: "1px solid #bbb",
+  background: "white",
+  color: green,
+  fontSize: 32,
+  cursor: "pointer",
+};
+
+const galleryScroller = {
+  display: "flex",
+  gap: 28,
+  overflowX: "auto",
+  padding: "0 35px 20px",
+  scrollSnapType: "x mandatory",
+};
+
+const galleryPhoto = {
+  flex: "0 0 min(65vw,460px)",
+  width: "min(65vw,460px)",
+  height: 600,
+  objectFit: "cover",
+  borderRadius: 16,
+  scrollSnapAlign: "start",
+};
+
+const rsvpSection = {
+  padding: "90px 22px",
+  background: cream,
+};
+
+const rsvpCard = {
+  maxWidth: 700,
+  margin: "0 auto",
+  padding: "55px 35px",
+  border: "1px solid #d8cbb4",
+  background: "#fffaf6",
+};
+
+const rsvpTitle = {
+  textAlign: "center",
+  fontSize: "clamp(50px,9vw,70px)",
+  fontStyle: "italic",
+};
+
+const rsvpIntro = {
+  textAlign: "center",
+  fontSize: 22,
+  fontStyle: "italic",
+  color: "#555",
+  marginBottom: 45,
+};
+
+const fieldLabel = {
+  margin: "25px 0 12px",
+  fontFamily: "Arial, sans-serif",
+  letterSpacing: 4,
+  fontWeight: 700,
+  textAlign: "center",
+};
+
+const bigInput = {
+  width: "100%",
+  boxSizing: "border-box",
+  padding: 20,
+  borderRadius: 22,
+  border: "2px solid #d4ddd7",
+  fontSize: 18,
+  background: "white",
+};
+
+const radioCard = {
+  display: "flex",
+  alignItems: "center",
+  gap: 18,
+  padding: 22,
+  marginTop: 15,
+  borderRadius: 20,
+  border: "2px solid #d4ddd7",
+  background: "white",
+  fontFamily: "Arial, sans-serif",
+};
+
+const radioTitle = {
+  fontSize: 18,
+};
+
+const radioSub = {
+  marginTop: 5,
+  color: "#8ca095",
+};
+
+const sendButton = {
+  width: "100%",
+  border: "none",
+  borderRadius: 999,
+  background: softGreen,
+  color: "white",
+  padding: 18,
+  marginTop: 30,
+  fontSize: 18,
+  fontWeight: 700,
+  cursor: "pointer",
+  letterSpacing: 3,
+};
+
+const wishSection = {
+  padding: "85px 25px",
+};
+
+const wishHeading = {
+  textAlign: "center",
+  letterSpacing: 5,
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
+  marginBottom: 40,
+};
+
+const wishList = {
+  maxWidth: 600,
+  margin: "0 auto 45px",
+};
+
+const wishDisplayCard = {
+  position: "relative",
+  minHeight: 220,
+  padding: "45px 35px",
+  borderRadius: 28,
+  background: "#fff8e7",
+  marginBottom: 20,
+  boxSizing: "border-box",
+};
+
+const quoteMark = {
+  position: "absolute",
+  top: 15,
+  right: 25,
+  fontSize: 80,
+  color: "#e1dfd0",
+};
+
+const wishDisplayText = {
+  fontSize: "clamp(24px,5vw,36px)",
+  lineHeight: 1.6,
+  fontStyle: "italic",
+  textAlign: "center",
+};
+
+const wishAuthor = {
+  marginTop: 25,
+  textAlign: "center",
+  letterSpacing: 5,
+  fontFamily: "Arial, sans-serif",
+  fontSize: 13,
+};
+
+const wishFormCard = {
+  maxWidth: 600,
+  margin: "0 auto",
+  borderRadius: 30,
+  padding: "35px 30px",
+  background: "#fff9ea",
+  border: "1px solid #ddd4c2",
+};
+
+const underlineInput = {
+  width: "100%",
+  border: "none",
+  borderBottom: "1px solid #cfc7b7",
+  background: "transparent",
+  padding: "15px 0",
+  fontSize: 18,
+  outline: "none",
+};
+
+const wishTextarea = {
+  width: "100%",
+  boxSizing: "border-box",
+  minHeight: 150,
+  marginTop: 25,
+  border: "none",
+  borderBottom: "1px solid #cfc7b7",
+  background: "transparent",
+  fontSize: 19,
+  fontStyle: "italic",
+  lineHeight: 1.7,
+  resize: "vertical",
+  outline: "none",
+};
+
+const characterCount = {
+  textAlign: "right",
+  color: "#999",
+  fontSize: 12,
+  marginTop: 5,
+};
+
+const shareSection = {
+  maxWidth: 650,
+  margin: "0 auto",
+  padding: "70px 25px",
+  textAlign: "center",
+};
+
+const shareIdStyle = {
+  margin: "25px 0",
+  padding: 15,
   borderRadius: 14,
-
-  background: "#fff",
+  background: "white",
+  fontFamily: "monospace",
 };
 
-const mongolPattern = {
+const footerStyle = {
+  background:
+    "linear-gradient(135deg,#063f2d,#152f0d)",
+  color: "#efcf74",
   textAlign: "center",
-
-  color: "#c99a32",
-
-  fontSize: 20,
-
-  letterSpacing: 7,
-
-  marginBottom: 16,
+  padding: "85px 25px 65px",
 };
 
-const kazakhPattern = {
-  textAlign: "center",
+const footerQuote = {
+  fontStyle: "italic",
+  fontSize: 22,
+  lineHeight: 1.8,
+};
 
-  color: "#d2ae56",
+const footerHeart = {
+  fontSize: 35,
+  margin: "30px 0",
+};
 
-  fontSize: 20,
+const footerNames = {
+  fontSize: "clamp(38px,7vw,58px)",
+  fontStyle: "italic",
+};
 
-  letterSpacing: 7,
+const copyright = {
+  marginTop: 25,
+  fontFamily: "Arial, sans-serif",
+  letterSpacing: 3,
+  fontSize: 11,
+};
 
-  marginBottom: 16,
+const editButton = {
+  marginTop: 35,
+  padding: "12px 25px",
+  borderRadius: 999,
+  border: "1px solid #efcf74",
+  background: "transparent",
+  color: "#efcf74",
+  cursor: "pointer",
 };
