@@ -13,7 +13,6 @@ export default function Home() {
   const [form, setForm] = useState({
     groom: "",
     bride: "",
-    hosts: "",
     date: "",
     time: "",
     venueName: "",
@@ -48,17 +47,20 @@ export default function Home() {
     form.bride || "Бүсгүй"
   }`;
 
-  const hosts = form.hosts || "Хуримын эзэд";
   const date = form.date || "2026-10-10";
   const time = form.time || "17:00";
-  const venueName = form.venueName || "Хуримын ордон";
-  const venueAddress = form.venueAddress || "Улаанбаатар";
+
+  const venueName =
+    form.venueName || "Хуримын ордон";
+
+  const venueAddress =
+    form.venueAddress || "Улаанбаатар";
 
   const message =
     form.message ||
-    "Эрхэм зочид оо! Хайр сэтгэлээ нэгтгэн амьдралын шинэ замаа эхлүүлэх энэ дурсамжит өдөр эрхэм таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
+    "Хайр сэтгэлээ нэгтгэн, амьдралын шинэ замаа хамтдаа эхлүүлэх энэ дурсамжит өдөр эрхэм таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
 
-  /* ===================== ЗУРАГ ===================== */
+  /* ===================== IMAGE ===================== */
 
   const readImage = (file, callback) => {
     if (!file) return;
@@ -70,7 +72,10 @@ export default function Home() {
 
     const reader = new FileReader();
 
-    reader.onload = () => callback(reader.result);
+    reader.onload = () => {
+      callback(reader.result);
+    };
+
     reader.readAsDataURL(file);
   };
 
@@ -109,7 +114,7 @@ export default function Home() {
           new Promise((resolve) => {
             const reader = new FileReader();
 
-            reader.onload = () =>
+            reader.onload = () => {
               resolve({
                 id:
                   Date.now().toString() +
@@ -117,6 +122,7 @@ export default function Home() {
                 src: reader.result,
                 name: file.name,
               });
+            };
 
             reader.readAsDataURL(file);
           })
@@ -166,9 +172,15 @@ export default function Home() {
     if (!form.date) return null;
 
     const targetTime = form.time || "00:00";
-    const value = new Date(`${form.date}T${targetTime}:00`);
+    const value = new Date(
+      `${form.date}T${targetTime}:00`
+    );
 
-    return Number.isNaN(value.getTime()) ? null : value;
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+
+    return value;
   }, [form.date, form.time]);
 
   const [countdown, setCountdown] = useState({
@@ -183,7 +195,8 @@ export default function Home() {
     if (!targetDate) return;
 
     const tick = () => {
-      const diff = targetDate.getTime() - Date.now();
+      const diff =
+        targetDate.getTime() - Date.now();
 
       if (diff <= 0) {
         setCountdown({
@@ -193,14 +206,21 @@ export default function Home() {
           seconds: 0,
           finished: true,
         });
+
         return;
       }
 
       setCountdown({
         days: Math.floor(diff / 86400000),
-        hours: Math.floor((diff / 3600000) % 24),
-        minutes: Math.floor((diff / 60000) % 60),
-        seconds: Math.floor((diff / 1000) % 60),
+        hours: Math.floor(
+          (diff / 3600000) % 24
+        ),
+        minutes: Math.floor(
+          (diff / 60000) % 60
+        ),
+        seconds: Math.floor(
+          (diff / 1000) % 60
+        ),
         finished: false,
       });
     };
@@ -235,11 +255,16 @@ export default function Home() {
     alert("Хариу илгээгдлээ.");
   };
 
-  /* ===================== ЕРӨӨЛ ===================== */
+  /* ===================== WISH ===================== */
 
   const handleWish = () => {
-    if (!wishName.trim() || !wishText.trim()) {
-      alert("Нэр болон ерөөлөө бичнэ үү.");
+    if (
+      !wishName.trim() ||
+      !wishText.trim()
+    ) {
+      alert(
+        "Нэр болон ерөөлөө бичнэ үү."
+      );
       return;
     }
 
@@ -272,8 +297,6 @@ export default function Home() {
     }
   };
 
-  /* ===================== GALLERY SCROLL ===================== */
-
   const scrollGallery = (direction) => {
     galleryRef.current?.scrollBy({
       left: direction * 320,
@@ -287,17 +310,20 @@ export default function Home() {
     return (
       <main style={pageStyle}>
         <section style={homeStyle}>
-          <div style={{ fontSize: 60 }}>💍</div>
+          <div style={{ fontSize: 58 }}>
+            💍
+          </div>
 
-          <h1 style={{ fontSize: 48, margin: "10px 0" }}>
+          <h1 style={{ fontSize: 48 }}>
             Урилга
           </h1>
 
-          <p style={{ color: "#777", fontSize: 19 }}>
+          <p style={{ color: "#777" }}>
             Хуримын онлайн урилгаа өөрөө бүтээ
           </p>
 
           <button
+            type="button"
             onClick={() => setStep("form")}
             style={primaryButton}
           >
@@ -314,7 +340,11 @@ export default function Home() {
     return (
       <main style={pageStyle}>
         <section style={formCard}>
-          <h1 style={{ textAlign: "center" }}>
+          <h1
+            style={{
+              textAlign: "center",
+            }}
+          >
             Урилгын мэдээлэл
           </h1>
 
@@ -332,14 +362,6 @@ export default function Home() {
               value={form.bride}
               onChange={change}
               placeholder="Бүсгүйн нэр"
-              style={inputStyle}
-            />
-
-            <input
-              name="hosts"
-              value={form.hosts}
-              onChange={change}
-              placeholder="Хуримын эзэд"
               style={inputStyle}
             />
 
@@ -420,7 +442,9 @@ export default function Home() {
                 accept="image/*"
                 multiple
                 onChange={handleGallery}
-                style={{ display: "none" }}
+                style={{
+                  display: "none",
+                }}
               />
 
               <button
@@ -435,28 +459,32 @@ export default function Home() {
 
               {form.gallery.length > 0 && (
                 <div style={galleryEditGrid}>
-                  {form.gallery.map((item) => (
-                    <div
-                      key={item.id}
-                      style={galleryEditItem}
-                    >
-                      <img
-                        src={item.src}
-                        alt=""
-                        style={galleryEditImage}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeGalleryPhoto(item.id)
-                        }
-                        style={miniDelete}
+                  {form.gallery.map(
+                    (item) => (
+                      <div
+                        key={item.id}
+                        style={galleryEditItem}
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                        <img
+                          src={item.src}
+                          alt=""
+                          style={galleryEditImage}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeGalleryPhoto(
+                              item.id
+                            )
+                          }
+                          style={miniDelete}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -467,9 +495,9 @@ export default function Home() {
                 name="message"
                 value={form.message}
                 onChange={change}
-                placeholder="Эрхэм зочид оо..."
                 rows={5}
                 maxLength={800}
+                placeholder="Хайр сэтгэлээ нэгтгэн..."
                 style={{
                   ...inputStyle,
                   lineHeight: 1.7,
@@ -483,7 +511,7 @@ export default function Home() {
                 setStep("preview");
                 window.scrollTo(0, 0);
               }}
-              style={pinkButton}
+              style={previewButton}
             >
               Урилгаа харах
             </button>
@@ -496,42 +524,46 @@ export default function Home() {
   /* ===================== PREVIEW ===================== */
 
   return (
-    <main style={previewBackground}>
+    <main style={previewPage}>
       <header style={headerStyle}>
-        <div style={menuIcon}>☰</div>
+        <div style={menuIcon}>
+          ☰
+        </div>
 
         <div style={headerNames}>
           {names}
         </div>
 
-        <div style={musicIcon}>♪</div>
+        <div style={musicIcon}>
+          ♪
+        </div>
       </header>
 
       {/* HERO */}
 
       <section style={heroSection}>
         {form.heroPhoto ? (
-          <img
-            src={form.heroPhoto}
-            alt="Хосын зураг"
-            style={heroImage}
-          />
+          <div style={heroImageFrame}>
+            <img
+              src={form.heroPhoto}
+              alt="Хосын зураг"
+              style={heroImage}
+            />
+          </div>
         ) : (
           <div style={heroPlaceholder}>
             Хосын нүүр зураг
           </div>
         )}
 
-        <div style={heroOverlay} />
-
         <div style={heroText}>
-          <div style={heroSmall}>
+          <div style={heroLabel}>
             ХУРИМЫН УРИЛГА
           </div>
 
-          <h1 style={heroNames}>
+          <div style={heroName}>
             {names}
-          </h1>
+          </div>
 
           <div style={heartLine}>
             ─── ♥ ───
@@ -539,63 +571,103 @@ export default function Home() {
         </div>
       </section>
 
-      {/* МЭНДЧИЛГЭЭ */}
+      {/* GREETING CARD */}
 
-      <section style={invitationMessageSection}>
-        <div style={smallScriptName}>
-          {names}
-        </div>
+      <section style={sectionWrap}>
+        <div style={greetingCard}>
+          <div style={greetingStar}>
+            ✦
+          </div>
 
-        <div style={guestTitle}>
-          Эрхэм зочид оо!!
-        </div>
+          <div style={greetingTitle}>
+            УРИЛГЫН МЭНДЧИЛГЭЭ
+          </div>
 
-        <p style={messageText}>
-          {message}
-        </p>
+          <div style={greetingLine} />
 
-        <div style={sparkle}>
-          ✦
+          <p style={greetingText}>
+            {message}
+          </p>
+
+          <div style={greetingBottom}>
+            ❦
+          </div>
         </div>
       </section>
 
-      {/* ХУРИМЫН ЭЗЭД */}
+      {/* DATE + TIME COMPACT */}
 
-      <section style={hostsSection}>
+      <section style={sectionWrap}>
+        <div style={dateTimeCard}>
+          <div style={dateTimeLabel}>
+            ОГНОО & ЦАГ
+          </div>
+
+          <div style={dateTimeValue}>
+            {date}
+          </div>
+
+          <div style={dateTimeDivider}>
+            •
+          </div>
+
+          <div style={dateTimeValue}>
+            {time}
+          </div>
+        </div>
+      </section>
+
+      {/* COUNTDOWN */}
+
+      <section style={countdownSection}>
         <div style={goldLabel}>
-          ХУРИМЫН ЭЗЭД
+          ХУРИМ ХҮРТЭЛ
         </div>
 
-        <div style={hostsPill}>
-          {hosts}
-        </div>
-      </section>
+        {!targetDate ? (
+          <p style={{ marginTop: 30 }}>
+            Хуримын огноогоо сонгоно уу.
+          </p>
+        ) : countdown.finished ? (
+          <div style={weddingToday}>
+            ӨНӨӨДӨР БИДНИЙ ХУРИМЫН ӨДӨР ♥
+          </div>
+        ) : (
+          <div style={countdownGrid}>
+            <CountdownBox
+              value={countdown.days}
+              label="Өдөр"
+            />
 
-      {/* DATE */}
+            <CountdownBox
+              value={countdown.hours}
+              label="Цаг"
+            />
 
-      <section style={infoSection}>
-        <InfoLargeCard
-          icon="▣"
-          label="ОГНОО / DATE"
-          value={date}
-        />
+            <CountdownBox
+              value={countdown.minutes}
+              label="Минут"
+            />
 
-        <InfoLargeCard
-          icon="◷"
-          label="ЦАГ / TIME"
-          value={`${time} ЦАГТ`}
-        />
+            <CountdownBox
+              value={countdown.seconds}
+              label="Секунд"
+            />
+          </div>
+        )}
       </section>
 
       {/* VENUE */}
 
       <section style={venueCard}>
         {form.venuePhoto && (
-          <img
-            src={form.venuePhoto}
-            alt="Байршил"
-            style={venueImage}
-          />
+          <div style={safeImageFrame}>
+            <img
+              src={form.venuePhoto}
+              alt="Байршлын зураг"
+              style={safeImage}
+            />
+          </div>
         )}
 
         <div style={venueContent}>
@@ -607,7 +679,7 @@ export default function Home() {
             {venueName}
           </div>
 
-          <div style={venueAddressStyle}>
+          <div style={venueAddress}>
             {venueAddress}
           </div>
 
@@ -622,41 +694,6 @@ export default function Home() {
             </a>
           )}
         </div>
-      </section>
-
-      {/* COUNTDOWN */}
-
-      <section style={countdownSection}>
-        <div style={goldLabel}>
-          ХУРИМ ХҮРТЭЛ
-        </div>
-
-        {!targetDate ? (
-          <p>Хуримын огноогоо сонгоно уу.</p>
-        ) : countdown.finished ? (
-          <div style={weddingToday}>
-            ӨНӨӨДӨР БИДНИЙ ХУРИМЫН ӨДӨР ♥
-          </div>
-        ) : (
-          <div style={countdownGrid}>
-            <CountdownBox
-              value={countdown.days}
-              label="Өдөр"
-            />
-            <CountdownBox
-              value={countdown.hours}
-              label="Цаг"
-            />
-            <CountdownBox
-              value={countdown.minutes}
-              label="Минут"
-            />
-            <CountdownBox
-              value={countdown.seconds}
-              label="Секунд"
-            />
-          </div>
-        )}
       </section>
 
       {/* GALLERY */}
@@ -676,6 +713,7 @@ export default function Home() {
 
             <div style={galleryButtons}>
               <button
+                type="button"
                 onClick={() =>
                   scrollGallery(-1)
                 }
@@ -685,6 +723,7 @@ export default function Home() {
               </button>
 
               <button
+                type="button"
                 onClick={() =>
                   scrollGallery(1)
                 }
@@ -700,12 +739,16 @@ export default function Home() {
             style={galleryScroller}
           >
             {form.gallery.map((item) => (
-              <img
+              <div
                 key={item.id}
-                src={item.src}
-                alt=""
-                style={galleryPhoto}
-              />
+                style={galleryPhotoFrame}
+              >
+                <img
+                  src={item.src}
+                  alt=""
+                  style={galleryPhoto}
+                />
+              </div>
             ))}
           </div>
         </section>
@@ -782,6 +825,7 @@ export default function Home() {
           ))}
 
           <button
+            type="button"
             onClick={handleRsvp}
             style={sendButton}
           >
@@ -790,7 +834,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WISHES */}
+      {/* WISH */}
 
       <section style={wishSection}>
         <div style={wishHeading}>
@@ -850,6 +894,7 @@ export default function Home() {
           </div>
 
           <button
+            type="button"
             onClick={handleWish}
             style={sendButton}
           >
@@ -870,6 +915,7 @@ export default function Home() {
         </div>
 
         <button
+          type="button"
           onClick={copyShareLink}
           style={mapButton}
         >
@@ -880,10 +926,6 @@ export default function Home() {
       {/* FOOTER */}
 
       <footer style={footerStyle}>
-        <p style={footerQuote}>
-          Хайрлаж явъя гэж харин бид өөрсдөө шийдсэн
-        </p>
-
         <div style={footerHeart}>
           ♥
         </div>
@@ -897,6 +939,7 @@ export default function Home() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
             setStep("form");
             window.scrollTo(0, 0);
@@ -934,7 +977,9 @@ function PhotoPicker({
         type="file"
         accept="image/*"
         onChange={onChange}
-        style={{ display: "none" }}
+        style={{
+          display: "none",
+        }}
       />
 
       {!photo ? (
@@ -982,28 +1027,6 @@ function PhotoPicker({
   );
 }
 
-function InfoLargeCard({
-  icon,
-  label,
-  value,
-}) {
-  return (
-    <div style={infoLargeCard}>
-      <div style={infoIcon}>
-        {icon}
-      </div>
-
-      <div style={infoLabel}>
-        {label}
-      </div>
-
-      <div style={infoValue}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
 function CountdownBox({
   value,
   label,
@@ -1021,16 +1044,18 @@ function CountdownBox({
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ===================== COLORS ===================== */
 
 const cream = "#fbf7f2";
-const green = "#063f2d";
+const green = "#073f2d";
 const gold = "#b58c19";
-const softGreen = "#9eac9f";
+const softGreen = "#9cab9b";
+
+/* ===================== FORM STYLES ===================== */
 
 const pageStyle = {
   minHeight: "100vh",
-  background: "#f7efe9",
+  background: "#f6eee8",
   fontFamily: "Arial, sans-serif",
   padding: 20,
 };
@@ -1044,8 +1069,8 @@ const formCard = {
   maxWidth: 720,
   margin: "30px auto",
   background: "#fff",
-  borderRadius: 24,
   padding: 28,
+  borderRadius: 24,
   boxShadow:
     "0 15px 45px rgba(0,0,0,.08)",
 };
@@ -1058,9 +1083,9 @@ const formGrid = {
 const inputStyle = {
   width: "100%",
   boxSizing: "border-box",
-  border: "1px solid #ddd",
-  borderRadius: 14,
   padding: 15,
+  borderRadius: 14,
+  border: "1px solid #ddd",
   fontSize: 16,
   marginTop: 6,
 };
@@ -1068,15 +1093,14 @@ const inputStyle = {
 const primaryButton = {
   border: "none",
   background: green,
-  color: "white",
+  color: "#fff",
   borderRadius: 999,
   padding: "15px 30px",
   fontSize: 17,
   cursor: "pointer",
-  marginTop: 25,
 };
 
-const pinkButton = {
+const previewButton = {
   ...primaryButton,
   width: "100%",
   background:
@@ -1084,22 +1108,22 @@ const pinkButton = {
 };
 
 const uploadCard = {
-  border: "1px solid #e6ddd4",
-  borderRadius: 22,
   padding: 20,
+  borderRadius: 20,
+  border: "1px solid #e5ddd5",
   background: "#fffdf9",
 };
 
 const uploadTitle = {
-  fontWeight: 700,
   fontSize: 17,
+  fontWeight: 700,
   color: green,
 };
 
 const uploadHint = {
-  color: "#999",
-  fontSize: 13,
   margin: "5px 0 15px",
+  fontSize: 13,
+  color: "#999",
 };
 
 const softButton = {
@@ -1113,18 +1137,16 @@ const softButton = {
 };
 
 const photoPreviewBox = {
-  width: "100%",
   marginTop: 12,
   background: "#f4f1ed",
   borderRadius: 18,
   padding: 8,
-  boxSizing: "border-box",
 };
 
 const photoPreview = {
   width: "100%",
   height: "auto",
-  maxHeight: 550,
+  maxHeight: 520,
   objectFit: "contain",
   display: "block",
   borderRadius: 14,
@@ -1169,7 +1191,8 @@ const galleryEditItem = {
 const galleryEditImage = {
   width: "100%",
   height: 120,
-  objectFit: "cover",
+  objectFit: "contain",
+  background: "#f5f3ef",
   borderRadius: 12,
 };
 
@@ -1182,13 +1205,13 @@ const miniDelete = {
   border: "none",
   borderRadius: "50%",
   background: "rgba(0,0,0,.65)",
-  color: "white",
+  color: "#fff",
   cursor: "pointer",
 };
 
-/* PREVIEW */
+/* ===================== PREVIEW ===================== */
 
-const previewBackground = {
+const previewPage = {
   minHeight: "100vh",
   background: cream,
   color: green,
@@ -1196,8 +1219,8 @@ const previewBackground = {
 };
 
 const headerStyle = {
-  height: 84,
-  background: "rgba(251,247,242,.96)",
+  minHeight: 82,
+  background: "rgba(251,247,242,.97)",
   display: "grid",
   gridTemplateColumns: "70px 1fr 70px",
   alignItems: "center",
@@ -1208,274 +1231,299 @@ const headerStyle = {
 };
 
 const menuIcon = {
-  fontSize: 30,
   textAlign: "center",
+  fontSize: 28,
 };
 
 const musicIcon = {
-  fontSize: 28,
   textAlign: "center",
+  fontSize: 26,
 };
 
 const headerNames = {
   textAlign: "center",
-  fontSize: "clamp(24px,5vw,36px)",
   fontStyle: "italic",
+  fontSize: "clamp(23px,5vw,36px)",
 };
 
+/* HERO */
+
 const heroSection = {
-  position: "relative",
+  maxWidth: 900,
+  margin: "0 auto",
+  padding: "25px 18px 55px",
+  textAlign: "center",
+};
+
+const heroImageFrame = {
   width: "100%",
-  minHeight: 620,
+  background: "#f3eee7",
+  borderRadius: 26,
   overflow: "hidden",
-  background: "#ddd",
+  padding: 8,
+  boxSizing: "border-box",
 };
 
 const heroImage = {
   width: "100%",
-  height: 700,
+  height: "auto",
+  maxHeight: 780,
+  objectFit: "contain",
   display: "block",
-  objectFit: "cover",
+  margin: "0 auto",
+  borderRadius: 20,
 };
 
 const heroPlaceholder = {
-  height: 650,
+  minHeight: 450,
   display: "grid",
   placeItems: "center",
-  background:
-    "linear-gradient(180deg,#cfc5bd,#eee6dd)",
-  color: "#777",
-};
-
-const heroOverlay = {
-  position: "absolute",
-  inset: 0,
-  background:
-    "linear-gradient(to bottom,rgba(0,0,0,.05) 25%,rgba(251,247,242,.15) 55%,#fbf7f2 100%)",
+  background: "#eee7df",
+  borderRadius: 26,
+  color: "#888",
 };
 
 const heroText = {
-  position: "absolute",
-  left: 20,
-  right: 20,
-  bottom: 70,
-  textAlign: "center",
+  marginTop: 32,
 };
 
-const heroSmall = {
-  letterSpacing: 5,
+const heroLabel = {
   color: gold,
+  letterSpacing: 5,
+  fontFamily: "Arial, sans-serif",
+  fontSize: 13,
   fontWeight: 700,
-  fontSize: 14,
 };
 
-const heroNames = {
-  margin: "18px 0",
-  fontSize: "clamp(44px,9vw,76px)",
+const heroName = {
+  marginTop: 14,
   fontStyle: "italic",
-  fontWeight: 500,
-  color: green,
+  fontSize: "clamp(40px,8vw,70px)",
 };
 
 const heartLine = {
-  color: "#d7aa2c",
-  letterSpacing: 5,
-};
-
-const invitationMessageSection = {
-  padding: "85px 25px",
-  maxWidth: 800,
-  margin: "0 auto",
-  textAlign: "center",
-};
-
-const smallScriptName = {
-  fontStyle: "italic",
-  fontSize: "clamp(28px,5vw,40px)",
-  marginBottom: 35,
-};
-
-const guestTitle = {
-  fontStyle: "italic",
-  fontSize: 22,
-  marginBottom: 25,
-};
-
-const messageText = {
-  fontSize: "clamp(18px,3vw,25px)",
-  lineHeight: 1.9,
-  color: "#555",
-  fontStyle: "italic",
-};
-
-const sparkle = {
-  marginTop: 45,
-  fontSize: 35,
-  color: "#d8ae2a",
-};
-
-const hostsSection = {
-  background: "#fbf1ea",
-  textAlign: "center",
-  padding: "75px 20px",
-};
-
-const goldLabel = {
-  letterSpacing: 5,
-  color: "#8e7000",
-  fontWeight: 700,
-  fontFamily: "Arial, sans-serif",
-  fontSize: 14,
-};
-
-const hostsPill = {
-  maxWidth: 560,
-  margin: "30px auto 0",
-  padding: "25px 20px",
-  borderRadius: 999,
-  border: "1px solid #d8c9ae",
-  fontSize: "clamp(26px,5vw,40px)",
-  fontStyle: "italic",
-};
-
-const infoSection = {
-  maxWidth: 760,
-  margin: "0 auto",
-  padding: "75px 25px 30px",
-  display: "grid",
-  gap: 28,
-};
-
-const infoLargeCard = {
-  border: "1px solid #d9cbb2",
-  padding: "45px 20px",
-  textAlign: "center",
-  background: "#fffaf6",
-};
-
-const infoIcon = {
-  color: "#8b7000",
-  fontSize: 42,
-  marginBottom: 18,
-};
-
-const infoLabel = {
-  fontFamily: "Arial, sans-serif",
-  fontWeight: 700,
-  letterSpacing: 4,
-  fontSize: 14,
-};
-
-const infoValue = {
-  marginTop: 20,
-  fontSize: "clamp(25px,5vw,36px)",
-};
-
-const venueCard = {
-  maxWidth: 760,
-  margin: "20px auto 80px",
-  border: "1px solid #d8c9ae",
-  padding: 28,
-  boxSizing: "border-box",
-};
-
-const venueImage = {
-  width: "100%",
-  maxHeight: 430,
-  objectFit: "cover",
-  borderRadius: 24,
-  display: "block",
-};
-
-const venueContent = {
-  padding: "35px 15px 10px",
-};
-
-const venueLabel = {
-  fontFamily: "Arial, sans-serif",
-  letterSpacing: 4,
-  fontWeight: 700,
-  fontSize: 14,
-};
-
-const venueTitle = {
-  marginTop: 25,
-  fontSize: "clamp(30px,6vw,45px)",
-  fontStyle: "italic",
-};
-
-const venueAddressStyle = {
   marginTop: 15,
-  fontSize: 21,
-  fontStyle: "italic",
-  color: "#555",
+  color: "#d5aa2a",
 };
 
-const mapButton = {
-  display: "block",
-  width: "100%",
-  boxSizing: "border-box",
-  marginTop: 30,
-  padding: "18px 20px",
-  background: green,
-  color: "#f6d577",
-  textDecoration: "none",
-  textAlign: "center",
-  border: "1px solid #d4ad25",
-  borderRadius: 999,
-  fontFamily: "Arial, sans-serif",
-  fontWeight: 700,
-  letterSpacing: 3,
-  cursor: "pointer",
+/* GREETING */
+
+const sectionWrap = {
+  maxWidth: 760,
+  margin: "0 auto",
+  padding: "20px 20px 45px",
 };
+
+const greetingCard = {
+  padding: "42px 28px",
+  borderRadius: 28,
+  border: "1px solid #d8c8a9",
+  background:
+    "linear-gradient(180deg,#fffdf9,#faf4e9)",
+  boxShadow:
+    "0 14px 40px rgba(0,0,0,.07)",
+  textAlign: "center",
+};
+
+const greetingStar = {
+  color: "#b79963",
+  fontSize: 25,
+};
+
+const greetingTitle = {
+  marginTop: 10,
+  color: "#816b4b",
+  fontFamily: "Arial, sans-serif",
+  letterSpacing: 4,
+  fontWeight: 700,
+  fontSize: 13,
+};
+
+const greetingLine = {
+  width: 70,
+  height: 1,
+  margin: "18px auto",
+  background: "#cbb58d",
+};
+
+const greetingText = {
+  maxWidth: 560,
+  margin: "0 auto",
+  fontSize: "clamp(18px,3vw,23px)",
+  lineHeight: 1.9,
+  color: "#555049",
+  fontStyle: "italic",
+};
+
+const greetingBottom = {
+  marginTop: 20,
+  color: "#b79963",
+  fontSize: 26,
+};
+
+/* DATE TIME */
+
+const dateTimeCard = {
+  padding: "30px 22px",
+  borderRadius: 22,
+  border: "1px solid #ded2bf",
+  background: "#fffaf4",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 18,
+  flexWrap: "wrap",
+  textAlign: "center",
+};
+
+const dateTimeLabel = {
+  width: "100%",
+  color: "#80681f",
+  letterSpacing: 4,
+  fontFamily: "Arial, sans-serif",
+  fontSize: 13,
+  fontWeight: 700,
+};
+
+const dateTimeValue = {
+  fontSize: "clamp(22px,4vw,32px)",
+};
+
+const dateTimeDivider = {
+  color: gold,
+  fontSize: 25,
+};
+
+/* COUNTDOWN */
 
 const countdownSection = {
   maxWidth: 760,
   margin: "0 auto",
-  padding: "50px 20px 90px",
+  padding: "25px 20px 75px",
   textAlign: "center",
+};
+
+const goldLabel = {
+  color: "#8c7000",
+  letterSpacing: 5,
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
+  fontSize: 13,
 };
 
 const countdownGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(4,1fr)",
+  gridTemplateColumns:
+    "repeat(4,minmax(0,1fr))",
   gap: 10,
-  marginTop: 35,
+  marginTop: 30,
 };
 
 const countdownBox = {
-  background: "#fff",
   padding: "20px 5px",
+  background: "#fff",
   borderRadius: 18,
   boxShadow:
     "0 8px 25px rgba(0,0,0,.06)",
 };
 
 const countdownValue = {
-  fontSize: "clamp(28px,6vw,48px)",
+  fontSize: "clamp(25px,5vw,44px)",
   fontWeight: 700,
 };
 
 const countdownLabel = {
-  marginTop: 7,
+  marginTop: 5,
   color: "#777",
   fontFamily: "Arial, sans-serif",
-  fontSize: 12,
+  fontSize: 11,
 };
 
 const weddingToday = {
   marginTop: 30,
-  fontSize: 25,
-  color: green,
+  fontSize: 22,
+  fontWeight: 700,
 };
 
+/* VENUE */
+
+const venueCard = {
+  maxWidth: 760,
+  margin: "0 auto 80px",
+  padding: 28,
+  boxSizing: "border-box",
+  border: "1px solid #d8c9ae",
+};
+
+const safeImageFrame = {
+  width: "100%",
+  background: "#f4efe8",
+  borderRadius: 24,
+  padding: 8,
+  boxSizing: "border-box",
+};
+
+const safeImage = {
+  width: "100%",
+  height: "auto",
+  maxHeight: 600,
+  objectFit: "contain",
+  display: "block",
+  margin: "0 auto",
+  borderRadius: 18,
+};
+
+const venueContent = {
+  padding: "30px 10px 5px",
+};
+
+const venueLabel = {
+  letterSpacing: 4,
+  fontFamily: "Arial, sans-serif",
+  fontSize: 13,
+  fontWeight: 700,
+};
+
+const venueTitle = {
+  marginTop: 24,
+  fontSize: "clamp(28px,5vw,42px)",
+  fontStyle: "italic",
+};
+
+const venueAddress = {
+  marginTop: 12,
+  color: "#555",
+  fontStyle: "italic",
+  fontSize: 20,
+};
+
+const mapButton = {
+  display: "block",
+  width: "100%",
+  boxSizing: "border-box",
+  marginTop: 28,
+  padding: "17px 18px",
+  border: "1px solid #d2aa24",
+  borderRadius: 999,
+  background: green,
+  color: "#f6d577",
+  textDecoration: "none",
+  textAlign: "center",
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
+  letterSpacing: 3,
+  cursor: "pointer",
+};
+
+/* GALLERY */
+
 const gallerySection = {
-  padding: "75px 0 90px",
+  padding: "70px 0 90px",
   background: "#fff",
 };
 
 const galleryHeader = {
-  padding: "0 35px 30px",
+  padding: "0 35px 28px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "end",
@@ -1484,8 +1532,8 @@ const galleryHeader = {
 
 const galleryTitle = {
   marginTop: 10,
-  fontSize: "clamp(30px,6vw,45px)",
   fontStyle: "italic",
+  fontSize: "clamp(28px,5vw,42px)",
 };
 
 const galleryButtons = {
@@ -1494,87 +1542,99 @@ const galleryButtons = {
 };
 
 const circleButton = {
-  width: 54,
-  height: 54,
+  width: 52,
+  height: 52,
   borderRadius: "50%",
   border: "1px solid #bbb",
-  background: "white",
+  background: "#fff",
   color: green,
-  fontSize: 32,
+  fontSize: 30,
   cursor: "pointer",
 };
 
 const galleryScroller = {
   display: "flex",
-  gap: 28,
+  gap: 25,
   overflowX: "auto",
   padding: "0 35px 20px",
   scrollSnapType: "x mandatory",
 };
 
-const galleryPhoto = {
-  flex: "0 0 min(65vw,460px)",
-  width: "min(65vw,460px)",
-  height: 600,
-  objectFit: "cover",
-  borderRadius: 16,
+const galleryPhotoFrame = {
+  flex: "0 0 min(75vw,500px)",
+  width: "min(75vw,500px)",
+  minHeight: 350,
+  display: "grid",
+  placeItems: "center",
+  background: "#f6f2ec",
+  borderRadius: 20,
+  padding: 10,
+  boxSizing: "border-box",
   scrollSnapAlign: "start",
 };
 
+const galleryPhoto = {
+  width: "100%",
+  height: "auto",
+  maxHeight: 650,
+  objectFit: "contain",
+  display: "block",
+  borderRadius: 15,
+};
+
+/* RSVP */
+
 const rsvpSection = {
-  padding: "90px 22px",
-  background: cream,
+  padding: "80px 20px",
 };
 
 const rsvpCard = {
-  maxWidth: 700,
+  maxWidth: 680,
   margin: "0 auto",
-  padding: "55px 35px",
+  padding: "50px 30px",
   border: "1px solid #d8cbb4",
   background: "#fffaf6",
 };
 
 const rsvpTitle = {
   textAlign: "center",
-  fontSize: "clamp(50px,9vw,70px)",
   fontStyle: "italic",
+  fontSize: "clamp(48px,8vw,68px)",
 };
 
 const rsvpIntro = {
   textAlign: "center",
-  fontSize: 22,
   fontStyle: "italic",
   color: "#555",
-  marginBottom: 45,
+  fontSize: 20,
 };
 
 const fieldLabel = {
-  margin: "25px 0 12px",
-  fontFamily: "Arial, sans-serif",
-  letterSpacing: 4,
-  fontWeight: 700,
+  margin: "28px 0 12px",
   textAlign: "center",
+  letterSpacing: 4,
+  fontFamily: "Arial, sans-serif",
+  fontWeight: 700,
 };
 
 const bigInput = {
   width: "100%",
   boxSizing: "border-box",
-  padding: 20,
-  borderRadius: 22,
+  padding: 18,
+  borderRadius: 20,
   border: "2px solid #d4ddd7",
-  fontSize: 18,
-  background: "white",
+  fontSize: 17,
 };
 
 const radioCard = {
   display: "flex",
-  alignItems: "center",
   gap: 18,
-  padding: 22,
-  marginTop: 15,
+  alignItems: "center",
+  padding: 20,
+  marginTop: 14,
   borderRadius: 20,
   border: "2px solid #d4ddd7",
-  background: "white",
+  background: "#fff",
   fontFamily: "Arial, sans-serif",
 };
 
@@ -1589,20 +1649,22 @@ const radioSub = {
 
 const sendButton = {
   width: "100%",
+  marginTop: 28,
+  padding: 17,
   border: "none",
   borderRadius: 999,
   background: softGreen,
-  color: "white",
-  padding: 18,
-  marginTop: 30,
-  fontSize: 18,
+  color: "#fff",
+  fontSize: 17,
+  letterSpacing: 3,
   fontWeight: 700,
   cursor: "pointer",
-  letterSpacing: 3,
 };
 
+/* WISH */
+
 const wishSection = {
-  padding: "85px 25px",
+  padding: "80px 20px",
 };
 
 const wishHeading = {
@@ -1610,52 +1672,50 @@ const wishHeading = {
   letterSpacing: 5,
   fontFamily: "Arial, sans-serif",
   fontWeight: 700,
-  marginBottom: 40,
+  marginBottom: 35,
 };
 
 const wishList = {
   maxWidth: 600,
-  margin: "0 auto 45px",
+  margin: "0 auto 40px",
 };
 
 const wishDisplayCard = {
   position: "relative",
-  minHeight: 220,
-  padding: "45px 35px",
-  borderRadius: 28,
+  padding: "40px 30px",
+  borderRadius: 26,
   background: "#fff8e7",
   marginBottom: 20,
-  boxSizing: "border-box",
 };
 
 const quoteMark = {
   position: "absolute",
-  top: 15,
-  right: 25,
-  fontSize: 80,
+  top: 10,
+  right: 20,
+  fontSize: 70,
   color: "#e1dfd0",
 };
 
 const wishDisplayText = {
-  fontSize: "clamp(24px,5vw,36px)",
-  lineHeight: 1.6,
-  fontStyle: "italic",
   textAlign: "center",
+  fontStyle: "italic",
+  fontSize: "clamp(22px,4vw,34px)",
+  lineHeight: 1.6,
 };
 
 const wishAuthor = {
-  marginTop: 25,
+  marginTop: 20,
   textAlign: "center",
-  letterSpacing: 5,
+  letterSpacing: 4,
   fontFamily: "Arial, sans-serif",
-  fontSize: 13,
+  fontSize: 12,
 };
 
 const wishFormCard = {
   maxWidth: 600,
   margin: "0 auto",
-  borderRadius: 30,
-  padding: "35px 30px",
+  padding: "32px 28px",
+  borderRadius: 28,
   background: "#fff9ea",
   border: "1px solid #ddd4c2",
 };
@@ -1664,9 +1724,9 @@ const underlineInput = {
   width: "100%",
   border: "none",
   borderBottom: "1px solid #cfc7b7",
+  padding: "14px 0",
   background: "transparent",
-  padding: "15px 0",
-  fontSize: 18,
+  fontSize: 17,
   outline: "none",
 };
 
@@ -1674,72 +1734,70 @@ const wishTextarea = {
   width: "100%",
   boxSizing: "border-box",
   minHeight: 150,
-  marginTop: 25,
+  marginTop: 22,
   border: "none",
   borderBottom: "1px solid #cfc7b7",
   background: "transparent",
-  fontSize: 19,
   fontStyle: "italic",
+  fontSize: 18,
   lineHeight: 1.7,
-  resize: "vertical",
   outline: "none",
+  resize: "vertical",
 };
 
 const characterCount = {
   textAlign: "right",
+  marginTop: 5,
   color: "#999",
   fontSize: 12,
-  marginTop: 5,
 };
+
+/* SHARE */
 
 const shareSection = {
   maxWidth: 650,
   margin: "0 auto",
-  padding: "70px 25px",
+  padding: "60px 25px 80px",
   textAlign: "center",
 };
 
 const shareIdStyle = {
-  margin: "25px 0",
-  padding: 15,
+  margin: "20px 0",
+  padding: 14,
   borderRadius: 14,
-  background: "white",
+  background: "#fff",
   fontFamily: "monospace",
 };
 
-const footerStyle = {
-  background:
-    "linear-gradient(135deg,#063f2d,#152f0d)",
-  color: "#efcf74",
-  textAlign: "center",
-  padding: "85px 25px 65px",
-};
+/* FOOTER */
 
-const footerQuote = {
-  fontStyle: "italic",
-  fontSize: 22,
-  lineHeight: 1.8,
+const footerStyle = {
+  padding: "75px 25px 60px",
+  textAlign: "center",
+  background:
+    "linear-gradient(135deg,#073f2d,#18320f)",
+  color: "#efcf74",
 };
 
 const footerHeart = {
   fontSize: 35,
-  margin: "30px 0",
 };
 
 const footerNames = {
-  fontSize: "clamp(38px,7vw,58px)",
+  marginTop: 20,
   fontStyle: "italic",
+  fontSize: "clamp(36px,7vw,56px)",
 };
 
 const copyright = {
-  marginTop: 25,
-  fontFamily: "Arial, sans-serif",
+  marginTop: 20,
   letterSpacing: 3,
+  fontFamily: "Arial, sans-serif",
   fontSize: 11,
 };
 
 const editButton = {
-  marginTop: 35,
+  marginTop: 30,
   padding: "12px 25px",
   borderRadius: 999,
   border: "1px solid #efcf74",
