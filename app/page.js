@@ -23,119 +23,25 @@ export default function Home() {
     });
   };
 
-  const templates = {
-    "Цагаан сонгодог": {
-      page: {
-        background:
-          "linear-gradient(135deg, #f7f4ef 0%, #ffffff 50%, #f2ece4 100%)",
-      },
-      card: {
-        background: "#ffffff",
-        color: "#3f352c",
-        border: "1px solid #d8c7ad",
-        boxShadow: "0 20px 60px rgba(86, 66, 47, 0.12)",
-      },
-      accent: "#b28a55",
-      nameColor: "#8a6238",
-      title: "СОНГОДОГ ХУРИМЫН УРИЛГА",
-      font: "Georgia, serif",
-    },
-
-    "Цэцгэн чимэг": {
-      page: {
-        background:
-          "radial-gradient(circle at top left,#ffe9ef 0,#fff7f9 35%,#f7eee8 100%)",
-      },
-      card: {
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(fff5f7,0.95))",
-        color: "#694b55",
-        border: "2px solid #efc4ce",
-        boxShadow: "0 20px 60px rgba(180, 90, 120, 0.16)",
-      },
-      accent: "#cf7f96",
-      nameColor: "#b35d78",
-      title: "🌸 БИДНИЙ ХУРИМЫН БАЯР 🌸",
-      font: "Georgia, serif",
-    },
-
-    "Modern 3D": {
-      page: {
-        background:
-          "linear-gradient(135deg,#dff5ff 0%,#f4e9ff 45%,#ffe8f0 100%)",
-      },
-      card: {
-        background: "rgba(255,255,255,0.62)",
-        color: "#28304a",
-        border: "1px solid rgba(255,255,255,0.85)",
-        boxShadow:
-          "0 30px 80px rgba(86, 94, 160, 0.22), inset 0 1px 0 rgba(255,255,255,0.8)",
-        backdropFilter: "blur(18px)",
-      },
-      accent: "#6f75c8",
-      nameColor: "#5458a8",
-      title: "✨ БИДНИЙ ХУРИМЫН БАЯР ✨",
-      font: "Arial, sans-serif",
-    },
-
-    "Монгол хээ": {
-      page: {
-        background:
-          "linear-gradient(135deg,#4b0b0b 0%,#8c1d18 45%,#4b0b0b 100%)",
-      },
-      card: {
-        background:
-          "linear-gradient(180deg,#fff9ec 0%,#f7e8bf 100%)",
-        color: "#4c1d12",
-        border: "4px double #c79a34",
-        boxShadow: "0 25px 70px rgba(0,0,0,0.30)",
-      },
-      accent: "#b78b28",
-      nameColor: "#8b1e17",
-      title: "☯ БИДНИЙ ХУРИМЫН БАЯР ☯",
-      font: "Georgia, serif",
-    },
-
-    "Казах той": {
-      page: {
-        background:
-          "linear-gradient(135deg,#082f5b 0%,#0f5f8c 45%,#082f5b 100%)",
-      },
-      card: {
-        background:
-          "linear-gradient(180deg,#f6fbff 0%,#e7f3fb 100%)",
-        color: "#133d5c",
-        border: "4px double #d5af52",
-        boxShadow: "0 25px 70px rgba(0,0,0,0.28)",
-      },
-      accent: "#d3aa4e",
-      nameColor: "#0b5a87",
-      title: "✦ ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ ✦",
-      font: "Georgia, serif",
-    },
-  };
-
-  const selectedTemplate =
-    templates[form.template] || templates["Цагаан сонгодог"];
+  const names = `${form.groom || "Хүргэн"} & ${form.bride || "Бүсгүй"}`;
+  const date = form.date || "2026-10-10";
+  const time = form.time || "17:00";
+  const venue = form.venue || "Хуримын ордон";
+  const message =
+    form.message ||
+    "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
 
   if (step === "home") {
     return (
       <main style={pageStyle}>
         <section style={centerStyle}>
           <div style={{ fontSize: 58 }}>💍</div>
-
-          <h1 style={{ fontSize: 48, marginBottom: 10 }}>
-            Урилга
-          </h1>
-
+          <h1 style={{ fontSize: 48, marginBottom: 10 }}>Урилга</h1>
           <p style={{ fontSize: 20, color: "#777" }}>
             Хуримын онлайн урилгаа өөрөө бүтээ
           </p>
 
-          <button
-            onClick={() => setStep("form")}
-            style={blackButton}
-          >
+          <button onClick={() => setStep("form")} style={blackButton}>
             Урилга бүтээх
           </button>
         </section>
@@ -147,9 +53,7 @@ export default function Home() {
     return (
       <main style={pageStyle}>
         <section style={cardStyle}>
-          <h1 style={{ textAlign: "center" }}>
-            Урилгын мэдээлэл
-          </h1>
+          <h1 style={{ textAlign: "center" }}>Урилгын мэдээлэл</h1>
 
           <div style={formStyle}>
             <input
@@ -236,11 +140,7 @@ export default function Home() {
                 setStep("preview");
                 window.scrollTo(0, 0);
               }}
-              style={{
-                ...pinkButton,
-                position: "relative",
-                zIndex: 10,
-              }}
+              style={pinkButton}
             >
               Урилгаа харах
             </button>
@@ -250,117 +150,406 @@ export default function Home() {
     );
   }
 
+  if (form.template === "Цагаан сонгодог") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "50px 20px",
+          background: "#f7f3ed",
+          fontFamily: "Georgia, serif",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 720,
+            margin: "0 auto",
+            background: "#fff",
+            padding: "80px 45px",
+            textAlign: "center",
+            border: "1px solid #c9b08a",
+            boxShadow: "0 20px 70px rgba(0,0,0,0.08)",
+          }}
+        >
+          <p style={{ letterSpacing: 4, color: "#a48354" }}>
+            WEDDING INVITATION
+          </p>
+
+          <div
+            style={{
+              width: 70,
+              height: 1,
+              background: "#b99b6b",
+              margin: "25px auto",
+            }}
+          />
+
+          <h1 style={{ fontSize: 52, color: "#6c5135" }}>{names}</h1>
+
+          <p style={{ fontSize: 18, lineHeight: 1.8, margin: "35px auto" }}>
+            Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+          </p>
+
+          <h2>{date}</h2>
+          <p>{time}</p>
+          <h3>{venue}</h3>
+
+          <p style={{ maxWidth: 500, margin: "30px auto", lineHeight: 1.8 }}>
+            {message}
+          </p>
+
+          <button onClick={() => setStep("form")} style={goldButton}>
+            ← Засах
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (form.template === "Цэцгэн чимэг") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "40px 20px",
+          background:
+            "linear-gradient(135deg,#fff2f5,#fffaf7,#f7eef1)",
+          fontFamily: "Georgia, serif",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 720,
+            margin: "0 auto",
+            background: "#fff",
+            padding: "45px",
+            borderRadius: 30,
+            border: "2px solid #efc2ce",
+            textAlign: "center",
+            position: "relative",
+          }}
+        >
+          <div style={flowerTop}>🌸 🌿 🌷 🌿 🌸</div>
+
+          <p style={{ color: "#bf6f86", letterSpacing: 2 }}>
+            ХАЙРЫН БАЯР
+          </p>
+
+          <h1
+            style={{
+              fontSize: 54,
+              color: "#a95370",
+              fontStyle: "italic",
+            }}
+          >
+            {names}
+          </h1>
+
+          <div style={flowerLine}>❀ ❀ ❀</div>
+
+          <p style={{ fontSize: 18, lineHeight: 1.8 }}>
+            Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+          </p>
+
+          <div
+            style={{
+              margin: "30px auto",
+              padding: 25,
+              maxWidth: 420,
+              background: "#fff7f9",
+              borderRadius: 22,
+            }}
+          >
+            <h2>{date}</h2>
+            <p>{time}</p>
+            <h3>{venue}</h3>
+          </div>
+
+          <p style={{ maxWidth: 520, margin: "30px auto", lineHeight: 1.8 }}>
+            {message}
+          </p>
+
+          <div style={flowerBottom}>🌷 🌿 🌸 🌿 🌷</div>
+
+          <button onClick={() => setStep("form")} style={pinkButton}>
+            ← Засах
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (form.template === "Modern 3D") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "45px 20px",
+          background:
+            "linear-gradient(135deg,#ccecff,#e6dcff,#ffe2ec)",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 760,
+            margin: "0 auto",
+            padding: 30,
+            borderRadius: 38,
+            background: "rgba(255,255,255,0.32)",
+            backdropFilter: "blur(18px)",
+            boxShadow:
+              "0 30px 80px rgba(85,91,170,0.25), inset 0 1px 0 rgba(255,255,255,0.8)",
+            border: "1px solid rgba(255,255,255,0.8)",
+          }}
+        >
+          <div
+            style={{
+              background: "rgba(255,255,255,0.62)",
+              borderRadius: 30,
+              padding: "60px 35px",
+              textAlign: "center",
+              boxShadow: "0 20px 50px rgba(110,110,180,0.14)",
+            }}
+          >
+            <div style={{ fontSize: 48 }}>💎</div>
+
+            <p
+              style={{
+                textTransform: "uppercase",
+                letterSpacing: 4,
+                color: "#6870c8",
+                fontWeight: 700,
+              }}
+            >
+              Modern Wedding
+            </p>
+
+            <h1
+              style={{
+                fontSize: 58,
+                margin: "20px 0",
+                background:
+                  "linear-gradient(90deg,#555bc0,#9b5faf,#d36f8e)",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              {names}
+            </h1>
+
+            <p style={{ fontSize: 19 }}>
+              Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                justifyContent: "center",
+                flexWrap: "wrap",
+                marginTop: 35,
+              }}
+            >
+              <InfoBox title="Огноо" value={date} />
+              <InfoBox title="Цаг" value={time} />
+              <InfoBox title="Байршил" value={venue} />
+            </div>
+
+            <p
+              style={{
+                maxWidth: 520,
+                margin: "35px auto",
+                lineHeight: 1.8,
+                color: "#4d536b",
+              }}
+            >
+              {message}
+            </p>
+
+            <button
+              onClick={() => setStep("form")}
+              style={{
+                ...blackButton,
+                background:
+                  "linear-gradient(90deg,#666ad4,#b26ca4)",
+              }}
+            >
+              ← Засах
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (form.template === "Монгол хээ") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "40px 20px",
+          background:
+            "linear-gradient(135deg,#4a0d0a,#851d18,#4a0d0a)",
+          fontFamily: "Georgia, serif",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 720,
+            margin: "0 auto",
+            background: "#fff4d7",
+            border: "6px double #c99a32",
+            padding: "28px",
+            boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
+
+          <div style={{ padding: "45px 30px", textAlign: "center" }}>
+            <p
+              style={{
+                color: "#b28628",
+                letterSpacing: 3,
+                fontWeight: 700,
+              }}
+            >
+              МОНГОЛ ХУРИМЫН УРИЛГА
+            </p>
+
+            <h1
+              style={{
+                fontSize: 54,
+                color: "#8d2019",
+                margin: "25px 0",
+              }}
+            >
+              {names}
+            </h1>
+
+            <p style={{ fontSize: 18, lineHeight: 1.8 }}>
+              Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+            </p>
+
+            <div
+              style={{
+                maxWidth: 430,
+                margin: "30px auto",
+                padding: 24,
+                borderTop: "2px solid #c99a32",
+                borderBottom: "2px solid #c99a32",
+              }}
+            >
+              <h2>{date}</h2>
+              <p>{time}</p>
+              <h3>{venue}</h3>
+            </div>
+
+            <p style={{ maxWidth: 520, margin: "30px auto", lineHeight: 1.8 }}>
+              {message}
+            </p>
+
+            <button onClick={() => setStep("form")} style={redGoldButton}>
+              ← Засах
+            </button>
+          </div>
+
+          <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main
       style={{
         minHeight: "100vh",
         padding: "40px 20px",
-        fontFamily: selectedTemplate.font,
-        ...selectedTemplate.page,
+        background:
+          "linear-gradient(135deg,#062b54,#0e608f,#062b54)",
+        fontFamily: "Georgia, serif",
       }}
     >
       <div
         style={{
           maxWidth: 720,
           margin: "0 auto",
-          textAlign: "center",
-          padding: "65px 35px",
-          borderRadius: 30,
-          ...selectedTemplate.card,
+          background: "#f5fbff",
+          border: "6px double #d2ae56",
+          padding: 25,
+          boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
         }}
       >
-        <div style={{ fontSize: 44 }}>💍</div>
+        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
 
-        <p
-          style={{
-            letterSpacing: 2,
-            fontSize: 15,
-            color: selectedTemplate.accent,
-            fontWeight: 700,
-          }}
-        >
-          {selectedTemplate.title}
-        </p>
-
-        <p
-          style={{
-            fontSize: 18,
-            lineHeight: 1.7,
-            marginTop: 16,
-          }}
-        >
-          Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
-        </p>
-
-        <h1
-          style={{
-            fontSize: 50,
-            color: selectedTemplate.nameColor,
-            margin: "28px 0",
-          }}
-        >
-          {form.groom || "Хүргэн"} & {form.bride || "Бүсгүй"}
-        </h1>
-
-        <div
-          style={{
-            width: 90,
-            height: 2,
-            background: selectedTemplate.accent,
-            margin: "25px auto",
-          }}
-        />
-
-        <h2>{form.date || "2026-10-10"}</h2>
-
-        <p style={{ fontSize: 19 }}>
-          {form.time || "17:00"}
-        </p>
-
-        <h3 style={{ fontSize: 23 }}>
-          {form.venue || "Хуримын ордон"}
-        </h3>
-
-        <p
-          style={{
-            maxWidth: 520,
-            margin: "28px auto",
-            lineHeight: 1.8,
-            fontSize: 18,
-          }}
-        >
-          {form.message ||
-            "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна."}
-        </p>
-
-        <div
-          style={{
-            marginTop: 30,
-            padding: 18,
-            borderRadius: 16,
-            border: `1px solid ${selectedTemplate.accent}`,
-          }}
-        >
-          <p>
-            Хэл: <strong>{form.language}</strong>
+        <div style={{ padding: "50px 30px", textAlign: "center" }}>
+          <p
+            style={{
+              color: "#c49b3e",
+              letterSpacing: 3,
+              fontWeight: 700,
+            }}
+          >
+            ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ
           </p>
 
-          <p>
-            Загвар: <strong>{form.template}</strong>
+          <h1
+            style={{
+              fontSize: 54,
+              color: "#0b5a87",
+              margin: "25px 0",
+            }}
+          >
+            {names}
+          </h1>
+
+          <p style={{ fontSize: 18, lineHeight: 1.8 }}>
+            Құрметті қонақ, қуанышымызға ортақтасуға шақырамыз.
           </p>
+
+          <div
+            style={{
+              margin: "35px auto",
+              padding: 26,
+              maxWidth: 430,
+              border: "2px solid #d2ae56",
+              borderRadius: 20,
+            }}
+          >
+            <h2>{date}</h2>
+            <p>{time}</p>
+            <h3>{venue}</h3>
+          </div>
+
+          <p style={{ maxWidth: 520, margin: "30px auto", lineHeight: 1.8 }}>
+            {message}
+          </p>
+
+          <button onClick={() => setStep("form")} style={blueGoldButton}>
+            ← Засах
+          </button>
         </div>
 
-        <button
-          onClick={() => setStep("form")}
-          style={{
-            ...blackButton,
-            background: selectedTemplate.accent,
-          }}
-        >
-          ← Засах
-        </button>
+        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
       </div>
     </main>
+  );
+}
+
+function InfoBox({ title, value }) {
+  return (
+    <div
+      style={{
+        minWidth: 150,
+        padding: 18,
+        borderRadius: 18,
+        background: "rgba(255,255,255,0.68)",
+        boxShadow: "0 10px 25px rgba(80,80,150,0.10)",
+      }}
+    >
+      <div style={{ fontSize: 13, color: "#777" }}>{title}</div>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
@@ -420,4 +609,55 @@ const pinkButton = {
   background: "#c97985",
   color: "#fff",
   cursor: "pointer",
+};
+
+const goldButton = {
+  ...blackButton,
+  background: "#a98655",
+};
+
+const redGoldButton = {
+  ...blackButton,
+  background: "#8d2019",
+  border: "1px solid #d7ae50",
+};
+
+const blueGoldButton = {
+  ...blackButton,
+  background: "#0b5a87",
+  border: "1px solid #d7ae50",
+};
+
+const flowerTop = {
+  fontSize: 28,
+  marginBottom: 24,
+};
+
+const flowerBottom = {
+  fontSize: 28,
+  marginTop: 28,
+};
+
+const flowerLine = {
+  color: "#d68aa0",
+  fontSize: 22,
+  margin: "20px 0",
+};
+
+const mongolPattern = {
+  textAlign: "center",
+  color: "#c99a32",
+  fontSize: 22,
+  letterSpacing: 8,
+  padding: "12px 0",
+  background: "#7b1712",
+};
+
+const kazakhPattern = {
+  textAlign: "center",
+  color: "#d2ae56",
+  fontSize: 22,
+  letterSpacing: 8,
+  padding: "12px 0",
+  background: "#083b68",
 };
