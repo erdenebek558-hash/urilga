@@ -153,7 +153,7 @@ export default function Home() {
         <div style={{ fontSize: 42 }}>💍</div>
 
         <p style={{ letterSpacing: 3, color: "#a37b5b" }}>
-          БИДНИЙ ХУРИМД УРЬЖ БАЙНА
+          Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
         </p>
 
         <h1 style={namesStyle}>
