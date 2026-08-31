@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Home() {
   const [step, setStep] = useState("home");
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     groom: "",
@@ -16,6 +17,7 @@ export default function Home() {
     language: "Монгол",
     template: "Цагаан сонгодог",
     photo: "",
+    photoName: "",
   });
 
   const [rsvpName, setRsvpName] = useState("");
@@ -37,7 +39,10 @@ export default function Home() {
     }));
   };
 
-  const names = `${form.groom || "Хүргэн"} & ${form.bride || "Бүсгүй"}`;
+  const names = `${form.groom || "Хүргэн"} & ${
+    form.bride || "Бүсгүй"
+  }`;
+
   const date = form.date || "2026-10-10";
   const time = form.time || "17:00";
   const venue = form.venue || "Хуримын ордон";
@@ -46,11 +51,54 @@ export default function Home() {
     form.message ||
     "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
 
+  /* ---------------- ЗУРАГ ---------------- */
+
+  const openPhotoPicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhoto = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Зөвхөн зураг сонгоно уу.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setForm((prev) => ({
+        ...prev,
+        photo: reader.result,
+        photoName: file.name,
+      }));
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setForm((prev) => ({
+      ...prev,
+      photo: "",
+      photoName: "",
+    }));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  /* ---------------- COUNTDOWN ---------------- */
+
   const targetDate = useMemo(() => {
     if (!form.date) return null;
 
-    const targetTime = form.time || "00:00";
-    const value = new Date(`${form.date}T${targetTime}:00`);
+    const selectedTime = form.time || "00:00";
+    const value = new Date(`${form.date}T${selectedTime}:00`);
 
     return Number.isNaN(value.getTime()) ? null : value;
   }, [form.date, form.time]);
@@ -96,22 +144,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  const handlePhoto = (e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setForm((prev) => ({
-        ...prev,
-        photo: reader.result,
-      }));
-    };
-
-    reader.readAsDataURL(file);
-  };
+  /* ---------------- RSVP ---------------- */
 
   const handleRsvp = () => {
     if (!rsvpName.trim()) {
@@ -132,6 +165,8 @@ export default function Home() {
     setRsvpStatus("Ирнэ");
   };
 
+  /* ---------------- ЕРӨӨЛ ---------------- */
+
   const handleWish = () => {
     if (!wishName.trim() || !wishText.trim()) {
       alert("Нэр болон ерөөлөө бичнэ үү.");
@@ -151,6 +186,8 @@ export default function Home() {
     setWishText("");
   };
 
+  /* ---------------- SHARE ---------------- */
+
   const copyShareLink = async () => {
     const url =
       typeof window !== "undefined"
@@ -159,11 +196,15 @@ export default function Home() {
 
     try {
       await navigator.clipboard.writeText(url);
-      alert("Линк хуулагдлаа.");
+      alert("Урилгын линк хуулагдлаа.");
     } catch {
       alert(url);
     }
   };
+
+  /* =====================================================
+     НҮҮР
+  ===================================================== */
 
   if (step === "home") {
     return (
@@ -191,6 +232,10 @@ export default function Home() {
     );
   }
 
+  /* =====================================================
+     FORM
+  ===================================================== */
+
   if (step === "form") {
     return (
       <main style={pageStyle}>
@@ -216,7 +261,7 @@ export default function Home() {
               style={inputStyle}
             />
 
-            <label>
+            <label style={labelStyle}>
               Хуримын огноо
               <input
                 name="date"
@@ -227,7 +272,7 @@ export default function Home() {
               />
             </label>
 
-            <label>
+            <label style={labelStyle}>
               Цаг
               <input
                 name="time"
@@ -254,34 +299,103 @@ export default function Home() {
               style={inputStyle}
             />
 
-            <label>
-              Хосын зураг
+            {/* -------- ШИНЭ ЗУРАГ UPLOAD -------- */}
+
+            <div style={photoUploadCard}>
+              <div style={photoUploadHeader}>
+                <div>
+                  <div style={photoUploadTitle}>
+                    📷 Хосын зураг
+                  </div>
+
+                  <div style={photoUploadHint}>
+                    Босоо эсвэл хэвтээ зураг сонгож болно
+                  </div>
+                </div>
+              </div>
+
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handlePhoto}
-                style={inputStyle}
+                style={{ display: "none" }}
+              />
+
+              {!form.photo ? (
+                <button
+                  type="button"
+                  onClick={openPhotoPicker}
+                  style={choosePhotoButton}
+                >
+                  ＋ Зураг сонгох
+                </button>
+              ) : (
+                <>
+                  <div style={photoPreviewContainer}>
+                    <img
+                      src={form.photo}
+                      alt="Сонгосон зураг"
+                      style={photoPreviewImage}
+                    />
+                  </div>
+
+                  {form.photoName && (
+                    <div style={photoFileName}>
+                      ✓ {form.photoName}
+                    </div>
+                  )}
+
+                  <div style={photoActionRow}>
+                    <button
+                      type="button"
+                      onClick={openPhotoPicker}
+                      style={changePhotoButton}
+                    >
+                      ↻ Зураг солих
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={removePhoto}
+                      style={deletePhotoButton}
+                    >
+                      🗑 Зураг арилгах
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* -------- УРИЛГЫН МЭНДЧИЛГЭЭ -------- */}
+
+            <label style={labelStyle}>
+              Урилгын мэндчилгээ
+              <textarea
+                name="message"
+                value={form.message}
+                onChange={change}
+                placeholder="Эрхэм хүндэт таныг бидний хуримын баярт..."
+                rows={5}
+                maxLength={800}
+                style={{
+                  ...inputStyle,
+                  resize: "vertical",
+                  lineHeight: 1.7,
+                }}
               />
             </label>
 
-            {form.photo && (
-              <div style={photoPreviewBox}>
-                <img
-                  src={form.photo}
-                  alt="Хосын зураг"
-                  style={photoPreviewStyle}
-                />
-              </div>
-            )}
-
-            <textarea
-              name="message"
-              value={form.message}
-              onChange={change}
-              placeholder="Урилгын текст"
-              rows={5}
-              style={inputStyle}
-            />
+            <div
+              style={{
+                textAlign: "right",
+                color: "#999",
+                fontSize: 12,
+                marginTop: -10,
+              }}
+            >
+              {form.message.length}/800
+            </div>
 
             <select
               name="language"
@@ -322,23 +436,37 @@ export default function Home() {
     );
   }
 
+  /* =====================================================
+     PREVIEW
+  ===================================================== */
+
   return (
     <main style={previewPage(form.template)}>
       <section style={previewCard(form.template)}>
         <TemplateHeader template={form.template} />
 
-        <p style={{ fontSize: 18, lineHeight: 1.8 }}>
+        <p
+          style={{
+            fontSize: 18,
+            lineHeight: 1.8,
+            opacity: 0.82,
+          }}
+        >
           Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
         </p>
 
-        <h1 style={namesStyle(form.template)}>{names}</h1>
+        <h1 style={namesStyle(form.template)}>
+          {names}
+        </h1>
+
+        {/* -------- БҮТЭН ЗУРАГ -------- */}
 
         {form.photo && (
-          <div style={fullPhotoBox}>
+          <div style={invitationPhotoFrame}>
             <img
               src={form.photo}
               alt="Хосын зураг"
-              style={fullPhotoStyle}
+              style={invitationPhoto}
             />
           </div>
         )}
@@ -349,12 +477,36 @@ export default function Home() {
           <InfoBox title="Байршил" value={venue} />
         </div>
 
-        <p style={messageStyle}>{message}</p>
+        {/* -------- МЭНДЧИЛГЭЭНИЙ CARD -------- */}
+
+        <section style={greetingCard(form.template)}>
+          <div style={greetingDecoration}>
+            ✦
+          </div>
+
+          <div style={greetingTitle}>
+            УРИЛГЫН МЭНДЧИЛГЭЭ
+          </div>
+
+          <div style={greetingLine} />
+
+          <p style={greetingText}>
+            {message}
+          </p>
+
+          <div style={greetingBottom}>
+            ❦
+          </div>
+        </section>
+
+        {/* -------- COUNTDOWN -------- */}
 
         <CountdownBlock
           countdown={countdown}
           hasDate={!!targetDate}
         />
+
+        {/* -------- GOOGLE MAPS -------- */}
 
         {form.mapUrl && (
           <a
@@ -367,8 +519,12 @@ export default function Home() {
           </a>
         )}
 
+        {/* -------- RSVP -------- */}
+
         <section style={sectionCard}>
-          <h2 style={sectionTitle}>RSVP</h2>
+          <h2 style={sectionTitle}>
+            Хүрэлцэн ирэх эсэх
+          </h2>
 
           <p style={sectionSub}>
             Та хуримын баярт хүрэлцэн ирэх эсэхээ мэдэгдэнэ үү.
@@ -376,14 +532,18 @@ export default function Home() {
 
           <input
             value={rsvpName}
-            onChange={(e) => setRsvpName(e.target.value)}
+            onChange={(e) =>
+              setRsvpName(e.target.value)
+            }
             placeholder="Таны нэр"
             style={inputStyle}
           />
 
           <select
             value={rsvpStatus}
-            onChange={(e) => setRsvpStatus(e.target.value)}
+            onChange={(e) =>
+              setRsvpStatus(e.target.value)
+            }
             style={inputStyle}
           >
             <option>Ирнэ</option>
@@ -396,13 +556,16 @@ export default function Home() {
             onClick={handleRsvp}
             style={greenButton}
           >
-            RSVP илгээх
+            Илгээх
           </button>
 
           {rsvps.length > 0 && (
             <div style={{ marginTop: 20 }}>
               {rsvps.map((item) => (
-                <div key={item.id} style={smallCard}>
+                <div
+                  key={item.id}
+                  style={smallCard}
+                >
                   <strong>{item.name}</strong>
                   <span>{item.status}</span>
                 </div>
@@ -411,23 +574,35 @@ export default function Home() {
           )}
         </section>
 
+        {/* -------- ЕРӨӨЛ -------- */}
+
         <section style={sectionCard}>
-          <h2 style={sectionTitle}>Ерөөлөө бичнэ үү</h2>
+          <h2 style={sectionTitle}>
+            Ерөөлөө бичнэ үү
+          </h2>
 
           <input
             value={wishName}
-            onChange={(e) => setWishName(e.target.value)}
-            placeholder="Таны нэр"
+            onChange={(e) =>
+              setWishName(e.target.value)
+            }
+            placeholder="Таны нэр..."
             style={inputStyle}
           />
 
           <textarea
             value={wishText}
-            onChange={(e) => setWishText(e.target.value)}
-            placeholder="Залуу гэр бүлд зориулсан ерөөл, хүсэлтээ бичнэ үү..."
+            onChange={(e) =>
+              setWishText(e.target.value)
+            }
+            placeholder="Залуу гэр бүлд зориулсан дулаан ерөөл, хүсэлтээ бичнэ үү..."
             maxLength={500}
             rows={5}
-            style={inputStyle}
+            style={{
+              ...inputStyle,
+              resize: "vertical",
+              lineHeight: 1.7,
+            }}
           />
 
           <div
@@ -445,15 +620,24 @@ export default function Home() {
             onClick={handleWish}
             style={greenButton}
           >
-            Ерөөл илгээх
+            ▷ Илгээх
           </button>
 
           {wishes.length > 0 && (
             <div style={{ marginTop: 20 }}>
               {wishes.map((wish) => (
-                <div key={wish.id} style={wishCard}>
+                <div
+                  key={wish.id}
+                  style={wishCard}
+                >
                   <strong>{wish.name}</strong>
-                  <p style={{ lineHeight: 1.7 }}>
+
+                  <p
+                    style={{
+                      lineHeight: 1.7,
+                      marginBottom: 0,
+                    }}
+                  >
                     {wish.text}
                   </p>
                 </div>
@@ -462,8 +646,12 @@ export default function Home() {
           )}
         </section>
 
+        {/* -------- SHARE -------- */}
+
         <section style={sectionCard}>
-          <h2 style={sectionTitle}>Урилгын линк</h2>
+          <h2 style={sectionTitle}>
+            Урилгын линк
+          </h2>
 
           <p style={sectionSub}>
             Энэ линкийг зочдод илгээж болно.
@@ -494,6 +682,10 @@ export default function Home() {
   );
 }
 
+/* =====================================================
+   COMPONENTS
+===================================================== */
+
 function TemplateHeader({ template }) {
   if (template === "Цэцгэн чимэг") {
     return (
@@ -501,6 +693,7 @@ function TemplateHeader({ template }) {
         <div style={{ fontSize: 30 }}>
           🌸 🌿 🌷 🌿 🌸
         </div>
+
         <p
           style={{
             letterSpacing: 4,
@@ -516,7 +709,10 @@ function TemplateHeader({ template }) {
   if (template === "Modern 3D") {
     return (
       <>
-        <div style={{ fontSize: 46 }}>💎</div>
+        <div style={{ fontSize: 46 }}>
+          💎
+        </div>
+
         <p
           style={{
             letterSpacing: 4,
@@ -535,6 +731,7 @@ function TemplateHeader({ template }) {
         <div style={mongolPattern}>
           ◆ ◈ ◆ ◈ ◆ ◈ ◆
         </div>
+
         <p
           style={{
             letterSpacing: 3,
@@ -553,6 +750,7 @@ function TemplateHeader({ template }) {
         <div style={kazakhPattern}>
           ✦ ❖ ✦ ❖ ✦ ❖ ✦
         </div>
+
         <p
           style={{
             letterSpacing: 3,
@@ -577,12 +775,20 @@ function TemplateHeader({ template }) {
   );
 }
 
-function CountdownBlock({ countdown, hasDate }) {
+function CountdownBlock({
+  countdown,
+  hasDate,
+}) {
   if (!hasDate) {
     return (
       <section style={sectionCard}>
-        <h2 style={sectionTitle}>Countdown</h2>
-        <p>Хуримын огноогоо сонгоно уу.</p>
+        <h2 style={sectionTitle}>
+          Хурим хүртэл
+        </h2>
+
+        <p>
+          Хуримын огноогоо сонгоно уу.
+        </p>
       </section>
     );
   }
@@ -599,21 +805,26 @@ function CountdownBlock({ countdown, hasDate }) {
 
   return (
     <section style={sectionCard}>
-      <h2 style={sectionTitle}>Хурим хүртэл</h2>
+      <h2 style={sectionTitle}>
+        Хурим хүртэл
+      </h2>
 
       <div style={countdownGrid}>
         <CountBox
           label="Өдөр"
           value={countdown.days}
         />
+
         <CountBox
           label="Цаг"
           value={countdown.hours}
         />
+
         <CountBox
           label="Минут"
           value={countdown.minutes}
         />
+
         <CountBox
           label="Секунд"
           value={countdown.seconds}
@@ -629,6 +840,7 @@ function CountBox({ label, value }) {
       <strong style={{ fontSize: 26 }}>
         {value}
       </strong>
+
       <span
         style={{
           fontSize: 12,
@@ -648,25 +860,37 @@ function InfoBox({ title, value }) {
         style={{
           fontSize: 12,
           color: "#777",
-          marginBottom: 5,
+          marginBottom: 6,
+          textTransform: "uppercase",
+          letterSpacing: 1,
         }}
       >
         {title}
       </div>
+
       <strong>{value}</strong>
     </div>
   );
 }
 
+/* =====================================================
+   TEMPLATE STYLES
+===================================================== */
+
 function previewPage(template) {
   const backgrounds = {
-    "Цагаан сонгодог": "#f7f3ed",
+    "Цагаан сонгодог":
+      "linear-gradient(180deg,#f7f3ed,#eee7dc)",
+
     "Цэцгэн чимэг":
       "linear-gradient(135deg,#fff8fa,#fffdfb,#f8eef2)",
+
     "Modern 3D":
       "linear-gradient(135deg,#ccecff,#e6dcff,#ffe2ec)",
+
     "Монгол хээ":
       "linear-gradient(135deg,#4a0d0a,#851d18,#4a0d0a)",
+
     "Казах той":
       "linear-gradient(135deg,#062b54,#0e608f,#062b54)",
   };
@@ -674,9 +898,11 @@ function previewPage(template) {
   return {
     minHeight: "100vh",
     padding: "40px 16px",
+
     background:
       backgrounds[template] ||
       backgrounds["Цагаан сонгодог"],
+
     fontFamily:
       template === "Modern 3D"
         ? "Arial, sans-serif"
@@ -694,13 +920,17 @@ function previewCard(template) {
     "Цэцгэн чимэг": {
       background:
         "linear-gradient(180deg,#fff,#fff7fa)",
+
       border: "1px solid #efc8d2",
     },
 
     "Modern 3D": {
-      background: "rgba(255,255,255,0.68)",
+      background:
+        "rgba(255,255,255,0.68)",
+
       border:
         "1px solid rgba(255,255,255,0.85)",
+
       backdropFilter: "blur(18px)",
     },
 
@@ -718,11 +948,16 @@ function previewCard(template) {
   return {
     maxWidth: 760,
     margin: "0 auto",
+
     padding: "50px 28px",
+
     textAlign: "center",
+
     borderRadius: 28,
+
     boxShadow:
       "0 24px 70px rgba(0,0,0,0.16)",
+
     ...styles[template],
   };
 }
@@ -737,17 +972,79 @@ function namesStyle(template) {
   };
 
   return {
-    fontSize: "clamp(42px, 7vw, 60px)",
+    fontSize:
+      "clamp(42px, 7vw, 60px)",
+
     margin: "24px 0",
-    color: colors[template] || "#333",
+
+    color:
+      colors[template] || "#333",
   };
 }
 
+function greetingCard(template) {
+  const cards = {
+    "Цагаан сонгодог": {
+      background:
+        "linear-gradient(180deg,#fffdf9,#faf5ec)",
+
+      border: "1px solid #d7c29f",
+    },
+
+    "Цэцгэн чимэг": {
+      background:
+        "linear-gradient(180deg,#fffafb,#fff2f6)",
+
+      border: "1px solid #edc7d2",
+    },
+
+    "Modern 3D": {
+      background:
+        "rgba(255,255,255,0.65)",
+
+      border:
+        "1px solid rgba(255,255,255,0.9)",
+    },
+
+    "Монгол хээ": {
+      background: "#fff8df",
+      border: "2px solid #c99a32",
+    },
+
+    "Казах той": {
+      background: "#f8fcff",
+      border: "2px solid #d2ae56",
+    },
+  };
+
+  return {
+    maxWidth: 600,
+
+    margin: "34px auto",
+
+    padding: "34px 26px",
+
+    borderRadius: 24,
+
+    boxShadow:
+      "0 12px 36px rgba(0,0,0,0.08)",
+
+    ...cards[template],
+  };
+}
+
+/* =====================================================
+   COMMON STYLES
+===================================================== */
+
 const pageStyle = {
   minHeight: "100vh",
+
   background:
     "linear-gradient(180deg,#fffaf7,#f5ebe5)",
+
   fontFamily: "Arial, sans-serif",
+
   padding: 24,
 };
 
@@ -758,10 +1055,15 @@ const centerStyle = {
 
 const formCard = {
   maxWidth: 680,
+
   margin: "40px auto",
+
   background: "#fff",
+
   padding: 30,
+
   borderRadius: 22,
+
   boxShadow:
     "0 10px 40px rgba(0,0,0,0.08)",
 };
@@ -772,97 +1074,340 @@ const formStyle = {
   marginTop: 30,
 };
 
+const labelStyle = {
+  display: "block",
+  fontSize: 15,
+  color: "#555",
+};
+
 const inputStyle = {
   width: "100%",
+
   boxSizing: "border-box",
+
   padding: 14,
-  borderRadius: 10,
+
+  borderRadius: 12,
+
   border: "1px solid #ddd",
+
   fontSize: 16,
+
   marginTop: 6,
+
+  background: "#fff",
 };
 
-const photoPreviewBox = {
-  width: "100%",
-  background: "#f5f5f5",
-  borderRadius: 18,
-  padding: 10,
-  boxSizing: "border-box",
-};
+/* -------- PHOTO UPLOAD -------- */
 
-const photoPreviewStyle = {
-  width: "100%",
-  height: "auto",
-  maxHeight: 520,
-  objectFit: "contain",
-  display: "block",
-  margin: "0 auto",
-  borderRadius: 14,
-};
+const photoUploadCard = {
+  padding: 20,
 
-const fullPhotoBox = {
-  width: "100%",
-  maxWidth: 620,
-  margin: "20px auto 30px",
-  padding: 10,
-  borderRadius: 26,
-  background: "rgba(255,255,255,0.55)",
-  boxSizing: "border-box",
-};
-
-const fullPhotoStyle = {
-  width: "100%",
-  height: "auto",
-  maxHeight: 720,
-  objectFit: "contain",
-  display: "block",
-  margin: "0 auto",
   borderRadius: 20,
+
+  border: "1px solid #eaded7",
+
+  background:
+    "linear-gradient(180deg,#fffdfb,#faf7f3)",
+
   boxShadow:
-    "0 18px 45px rgba(0,0,0,0.12)",
+    "0 8px 24px rgba(0,0,0,0.04)",
 };
+
+const photoUploadHeader = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 16,
+};
+
+const photoUploadTitle = {
+  fontSize: 17,
+  fontWeight: 700,
+  color: "#554941",
+};
+
+const photoUploadHint = {
+  marginTop: 5,
+  fontSize: 13,
+  color: "#999",
+};
+
+const choosePhotoButton = {
+  width: "100%",
+
+  padding: "16px 20px",
+
+  borderRadius: 16,
+
+  border: "1px dashed #c997a4",
+
+  background: "#fff7f9",
+
+  color: "#a45f72",
+
+  fontWeight: 700,
+
+  fontSize: 16,
+
+  cursor: "pointer",
+};
+
+const photoPreviewContainer = {
+  width: "100%",
+
+  display: "flex",
+
+  alignItems: "center",
+
+  justifyContent: "center",
+
+  background: "#f3f0ed",
+
+  borderRadius: 18,
+
+  overflow: "hidden",
+
+  padding: 10,
+
+  boxSizing: "border-box",
+};
+
+const photoPreviewImage = {
+  display: "block",
+
+  width: "100%",
+
+  height: "auto",
+
+  maxHeight: 560,
+
+  objectFit: "contain",
+
+  borderRadius: 14,
+
+  margin: "0 auto",
+};
+
+const photoFileName = {
+  padding: "10px 4px 2px",
+
+  fontSize: 13,
+
+  color: "#777",
+
+  overflow: "hidden",
+
+  textOverflow: "ellipsis",
+
+  whiteSpace: "nowrap",
+};
+
+const photoActionRow = {
+  display: "grid",
+
+  gridTemplateColumns:
+    "repeat(2,minmax(0,1fr))",
+
+  gap: 10,
+
+  marginTop: 14,
+};
+
+const changePhotoButton = {
+  padding: 13,
+
+  borderRadius: 12,
+
+  border: "1px solid #c8b7ad",
+
+  background: "#fff",
+
+  color: "#66564e",
+
+  fontWeight: 700,
+
+  cursor: "pointer",
+};
+
+const deletePhotoButton = {
+  padding: 13,
+
+  borderRadius: 12,
+
+  border: "1px solid #ecc9c9",
+
+  background: "#fff5f5",
+
+  color: "#a54f4f",
+
+  fontWeight: 700,
+
+  cursor: "pointer",
+};
+
+/* -------- PREVIEW PHOTO -------- */
+
+const invitationPhotoFrame = {
+  width: "100%",
+
+  maxWidth: 620,
+
+  margin: "24px auto 32px",
+
+  padding: 10,
+
+  boxSizing: "border-box",
+
+  borderRadius: 26,
+
+  background:
+    "rgba(255,255,255,0.56)",
+
+  boxShadow:
+    "0 18px 45px rgba(0,0,0,0.10)",
+};
+
+const invitationPhoto = {
+  display: "block",
+
+  width: "100%",
+
+  height: "auto",
+
+  maxHeight: 760,
+
+  objectFit: "contain",
+
+  margin: "0 auto",
+
+  borderRadius: 20,
+};
+
+/* -------- GREETING -------- */
+
+const greetingDecoration = {
+  fontSize: 22,
+  color: "#b7996c",
+};
+
+const greetingTitle = {
+  marginTop: 12,
+
+  fontSize: 13,
+
+  fontWeight: 700,
+
+  letterSpacing: 3,
+
+  color: "#8a7357",
+};
+
+const greetingLine = {
+  width: 70,
+
+  height: 1,
+
+  margin: "18px auto",
+
+  background: "#cdb892",
+};
+
+const greetingText = {
+  maxWidth: 520,
+
+  margin: "0 auto",
+
+  fontSize: 18,
+
+  lineHeight: 1.9,
+
+  color: "#554f49",
+};
+
+const greetingBottom = {
+  marginTop: 20,
+
+  fontSize: 24,
+
+  color: "#b7996c",
+};
+
+/* -------- BUTTONS -------- */
 
 const blackButton = {
   marginTop: 24,
+
   border: "none",
+
   borderRadius: 14,
+
   padding: "15px 28px",
+
   fontSize: 17,
+
   background: "#222",
+
   color: "#fff",
+
   cursor: "pointer",
 };
 
 const pinkButton = {
   border: "none",
+
   borderRadius: 14,
+
   padding: 16,
+
   fontSize: 18,
-  background: "#c97985",
+
+  background:
+    "linear-gradient(90deg,#bd7c87,#d18a98)",
+
   color: "#fff",
+
   cursor: "pointer",
+
+  boxShadow:
+    "0 9px 24px rgba(180,110,130,0.20)",
 };
 
 const greenButton = {
   width: "100%",
+
   marginTop: 12,
+
   border: "none",
+
   borderRadius: 999,
+
   padding: 14,
+
   background: "#9cab9b",
+
   color: "#fff",
+
   fontSize: 17,
+
   cursor: "pointer",
 };
 
 const mapButton = {
   display: "inline-block",
+
   margin: "14px auto 30px",
+
   padding: "14px 22px",
+
   borderRadius: 999,
+
   background: "#456b57",
+
   color: "#fff",
+
   textDecoration: "none",
+
   fontWeight: 700,
 };
 
@@ -871,24 +1416,38 @@ const shareButton = {
   background: "#5c6f8c",
 };
 
+/* -------- CARDS -------- */
+
 const shareCode = {
   background: "#f4f4f4",
+
   padding: 12,
+
   borderRadius: 12,
+
   fontFamily: "monospace",
+
   marginBottom: 10,
+
   wordBreak: "break-all",
 };
 
 const sectionCard = {
   margin: "30px auto",
+
   padding: 24,
+
   maxWidth: 620,
+
   borderRadius: 22,
+
   background:
     "rgba(255,255,255,0.72)",
+
   border:
     "1px solid rgba(150,150,150,0.18)",
+
+  boxSizing: "border-box",
 };
 
 const sectionTitle = {
@@ -903,76 +1462,101 @@ const sectionSub = {
 
 const infoGrid = {
   display: "grid",
+
   gridTemplateColumns:
     "repeat(auto-fit,minmax(150px,1fr))",
+
   gap: 14,
+
   margin: "30px 0",
 };
 
 const infoBox = {
   padding: 18,
+
   borderRadius: 18,
+
   background:
     "rgba(255,255,255,0.75)",
+
   boxShadow:
     "0 8px 22px rgba(0,0,0,0.08)",
 };
 
 const countdownGrid = {
   display: "grid",
+
   gridTemplateColumns:
     "repeat(4,minmax(0,1fr))",
-  gap: 10,
+
+  gap: 8,
+
   marginTop: 16,
 };
 
 const countBox = {
   display: "grid",
+
   gap: 4,
-  padding: 14,
+
+  padding: "14px 5px",
+
   borderRadius: 16,
+
   background: "#fff",
+
   boxShadow:
     "0 6px 18px rgba(0,0,0,0.06)",
 };
 
 const smallCard = {
   display: "flex",
+
   justifyContent: "space-between",
+
   gap: 10,
+
   padding: 12,
+
   marginBottom: 8,
+
   borderRadius: 12,
+
   background: "#fff",
 };
 
 const wishCard = {
   textAlign: "left",
-  padding: 16,
-  marginBottom: 12,
-  borderRadius: 14,
-  background: "#fff",
-};
 
-const messageStyle = {
-  maxWidth: 560,
-  margin: "30px auto",
-  lineHeight: 1.8,
-  fontSize: 18,
+  padding: 16,
+
+  marginBottom: 12,
+
+  borderRadius: 14,
+
+  background: "#fff",
 };
 
 const mongolPattern = {
   textAlign: "center",
+
   color: "#c99a32",
+
   fontSize: 20,
+
   letterSpacing: 7,
+
   marginBottom: 16,
 };
 
 const kazakhPattern = {
   textAlign: "center",
+
   color: "#d2ae56",
+
   fontSize: 20,
+
   letterSpacing: 7,
+
   marginBottom: 16,
 };
