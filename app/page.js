@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const [step, setStep] = useState("home");
@@ -11,16 +11,30 @@ export default function Home() {
     date: "",
     time: "",
     venue: "",
+    mapUrl: "",
     message: "",
     language: "Монгол",
     template: "Цагаан сонгодог",
+    photo: "",
   });
 
+  const [rsvpName, setRsvpName] = useState("");
+  const [rsvpStatus, setRsvpStatus] = useState("Ирнэ");
+  const [rsvps, setRsvps] = useState([]);
+
+  const [wishName, setWishName] = useState("");
+  const [wishText, setWishText] = useState("");
+  const [wishes, setWishes] = useState([]);
+
+  const [shareId] = useState(() =>
+    Math.random().toString(36).slice(2, 10)
+  );
+
   const change = (e) => {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const names = `${form.groom || "Хүргэн"} & ${form.bride || "Бүсгүй"}`;
@@ -30,6 +44,125 @@ export default function Home() {
   const message =
     form.message ||
     "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
+
+  const targetDate = useMemo(() => {
+    if (!form.date) return null;
+
+    const targetTime = form.time || "00:00";
+    const value = new Date(`${form.date}T${targetTime}:00`);
+
+    return Number.isNaN(value.getTime()) ? null : value;
+  }, [form.date, form.time]);
+
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    finished: false,
+  });
+
+  useEffect(() => {
+    if (!targetDate) return;
+
+    const updateCountdown = () => {
+      const diff = targetDate.getTime() - Date.now();
+
+      if (diff <= 0) {
+        setCountdown({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          finished: true,
+        });
+        return;
+      }
+
+      setCountdown({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+        finished: false,
+      });
+    };
+
+    updateCountdown();
+
+    const timer = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const handlePhoto = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setForm((prev) => ({
+        ...prev,
+        photo: reader.result,
+      }));
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleRsvp = () => {
+    if (!rsvpName.trim()) {
+      alert("Нэрээ бичнэ үү.");
+      return;
+    }
+
+    setRsvps((prev) => [
+      {
+        id: Date.now(),
+        name: rsvpName.trim(),
+        status: rsvpStatus,
+      },
+      ...prev,
+    ]);
+
+    setRsvpName("");
+    setRsvpStatus("Ирнэ");
+  };
+
+  const handleWish = () => {
+    if (!wishName.trim() || !wishText.trim()) {
+      alert("Нэр болон ерөөлөө бичнэ үү.");
+      return;
+    }
+
+    setWishes((prev) => [
+      {
+        id: Date.now(),
+        name: wishName.trim(),
+        text: wishText.trim(),
+      },
+      ...prev,
+    ]);
+
+    setWishName("");
+    setWishText("");
+  };
+
+  const copyShareLink = async () => {
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/?invite=${shareId}`
+        : "";
+
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("Линк хуулагдлаа.");
+    } catch {
+      alert(url);
+    }
+  };
 
   if (step === "home") {
     return (
@@ -112,6 +245,37 @@ export default function Home() {
               style={inputStyle}
             />
 
+            <input
+              name="mapUrl"
+              value={form.mapUrl}
+              onChange={change}
+              placeholder="Google Maps линк"
+              style={inputStyle}
+            />
+
+            <label>
+              Хосын зураг
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhoto}
+                style={inputStyle}
+              />
+            </label>
+
+            {form.photo && (
+              <img
+                src={form.photo}
+                alt="Хосын зураг"
+                style={{
+                  width: "100%",
+                  maxHeight: 280,
+                  objectFit: "cover",
+                  borderRadius: 18,
+                }}
+              />
+            )}
+
             <textarea
               name="message"
               value={form.message}
@@ -160,451 +324,350 @@ export default function Home() {
     );
   }
 
-  if (form.template === "Цагаан сонгодог") {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "50px 20px",
-          background: "#f7f3ed",
-          fontFamily: "Georgia, serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            background: "#fff",
-            padding: "80px 45px",
-            textAlign: "center",
-            border: "1px solid #c9b08a",
-            boxShadow: "0 20px 70px rgba(0,0,0,0.08)",
-          }}
-        >
-          <p style={{ letterSpacing: 4, color: "#a48354" }}>
-            WEDDING INVITATION
-          </p>
+  return (
+    <main style={previewPage(form.template)}>
+      <section style={previewCard(form.template)}>
+        <TemplateHeader template={form.template} />
 
-          <div style={goldLine} />
+        <p style={{ fontSize: 18, lineHeight: 1.8 }}>
+          Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
+        </p>
 
-          <p style={{ fontSize: 18, lineHeight: 1.8 }}>
-            Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
-          </p>
+        <h1 style={namesStyle(form.template)}>{names}</h1>
 
-          <h1
+        {form.photo && (
+          <img
+            src={form.photo}
+            alt="Хосын зураг"
             style={{
-              fontSize: 52,
-              color: "#6c5135",
-              margin: "25px 0",
+              width: "100%",
+              maxWidth: 560,
+              height: 360,
+              objectFit: "cover",
+              borderRadius: 26,
+              margin: "20px auto 30px",
+              display: "block",
+              boxShadow: "0 18px 45px rgba(0,0,0,0.15)",
             }}
+          />
+        )}
+
+        <div style={infoGrid}>
+          <InfoBox title="Огноо" value={date} />
+          <InfoBox title="Цаг" value={time} />
+          <InfoBox title="Байршил" value={venue} />
+        </div>
+
+        <p style={messageStyle}>{message}</p>
+
+        <CountdownBlock countdown={countdown} hasDate={!!targetDate} />
+
+        {form.mapUrl && (
+          <a
+            href={form.mapUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={mapButton}
           >
-            {names}
-          </h1>
+            📍 Google Maps дээр харах
+          </a>
+        )}
 
-          <h2>{date}</h2>
-          <p>{time}</p>
-          <h3>{venue}</h3>
+        <section style={sectionCard}>
+          <h2 style={sectionTitle}>RSVP</h2>
 
-          <p style={messageStyle}>{message}</p>
+          <p style={sectionSub}>
+            Та хуримын баярт хүрэлцэн ирэх эсэхээ мэдэгдэнэ үү.
+          </p>
+
+          <input
+            value={rsvpName}
+            onChange={(e) => setRsvpName(e.target.value)}
+            placeholder="Таны нэр"
+            style={inputStyle}
+          />
+
+          <select
+            value={rsvpStatus}
+            onChange={(e) => setRsvpStatus(e.target.value)}
+            style={inputStyle}
+          >
+            <option>Ирнэ</option>
+            <option>Ирэхгүй</option>
+            <option>Одоогоор мэдэхгүй</option>
+          </select>
 
           <button
             type="button"
-            onClick={() => setStep("form")}
-            style={goldButton}
+            onClick={handleRsvp}
+            style={greenButton}
           >
-            ← Засах
+            RSVP илгээх
           </button>
-        </div>
-      </main>
-    );
-  }
 
-  if (form.template === "Цэцгэн чимэг") {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "40px 16px",
-          background:
-            "linear-gradient(135deg,#fff8fa 0%,#fffdfb 45%,#f8eef2 100%)",
-          fontFamily: "Georgia, serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            background:
-              "linear-gradient(180deg,#ffffff 0%,#fff7fa 100%)",
-            padding: "42px 28px",
-            borderRadius: 30,
-            border: "1px solid #efc8d2",
-            boxShadow: "0 24px 70px rgba(164,92,118,0.16)",
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div style={cornerFlowerTopLeft}>🌸</div>
-          <div style={cornerFlowerTopRight}>🌷</div>
-          <div style={cornerFlowerBottomLeft}>🌿</div>
-          <div style={cornerFlowerBottomRight}>🌸</div>
-
-          <div style={{ position: "relative", zIndex: 2 }}>
-            <div
-              style={{
-                fontSize: 28,
-                letterSpacing: 8,
-                color: "#c77690",
-              }}
-            >
-              ❀ ❁ ❀
+          {rsvps.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              {rsvps.map((item) => (
+                <div key={item.id} style={smallCard}>
+                  <strong>{item.name}</strong>
+                  <span>{item.status}</span>
+                </div>
+              ))}
             </div>
+          )}
+        </section>
 
-            <p
-              style={{
-                color: "#a85f76",
-                letterSpacing: 4,
-                fontSize: 14,
-                fontWeight: 700,
-                marginTop: 18,
-              }}
-            >
-              ХАЙРЫН БАЯР
-            </p>
+        <section style={sectionCard}>
+          <h2 style={sectionTitle}>Ерөөлөө бичнэ үү</h2>
 
-            <p
-              style={{
-                fontSize: 18,
-                lineHeight: 1.8,
-                color: "#6d5960",
-              }}
-            >
-              Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
-            </p>
+          <input
+            value={wishName}
+            onChange={(e) => setWishName(e.target.value)}
+            placeholder="Таны нэр"
+            style={inputStyle}
+          />
 
-            <h1
-              style={{
-                fontSize: "clamp(42px, 7vw, 66px)",
-                color: "#b85f7c",
-                fontStyle: "italic",
-                margin: "22px 0",
-              }}
-            >
-              {names}
-            </h1>
+          <textarea
+            value={wishText}
+            onChange={(e) => setWishText(e.target.value)}
+            placeholder="Залуу гэр бүлд зориулсан ерөөл, хүсэлтээ бичнэ үү..."
+            maxLength={500}
+            rows={5}
+            style={inputStyle}
+          />
 
-            <div style={pinkLine} />
-
-            <div style={flowerInfoCard}>
-              <div style={infoItem}>
-                <span style={infoLabel}>ОГНОО</span>
-                <strong style={infoValue}>{date}</strong>
-              </div>
-
-              <div style={infoItem}>
-                <span style={infoLabel}>ЦАГ</span>
-                <strong style={infoValue}>{time}</strong>
-              </div>
-
-              <div style={infoItem}>
-                <span style={infoLabel}>БАЙРШИЛ</span>
-                <strong style={infoValue}>{venue}</strong>
-              </div>
-            </div>
-
-            <p style={messageStyle}>{message}</p>
-
-            <div
-              style={{
-                fontSize: 24,
-                letterSpacing: 8,
-                color: "#c77690",
-                marginTop: 24,
-              }}
-            >
-              ❀ ❁ ❀
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setStep("form")}
-              style={{
-                ...pinkButton,
-                marginTop: 28,
-              }}
-            >
-              ← Засах
-            </button>
+          <div style={{ textAlign: "right", color: "#888", fontSize: 13 }}>
+            {wishText.length}/500
           </div>
-        </div>
-      </main>
-    );
-  }
 
-  if (form.template === "Modern 3D") {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "45px 20px",
-          background:
-            "linear-gradient(135deg,#ccecff 0%,#e6dcff 45%,#ffe2ec 100%)",
-          fontFamily: "Arial, sans-serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 760,
-            margin: "0 auto",
-            padding: 30,
-            borderRadius: 38,
-            background: "rgba(255,255,255,0.32)",
-            backdropFilter: "blur(18px)",
-            boxShadow:
-              "0 30px 80px rgba(85,91,170,0.25)",
-            border: "1px solid rgba(255,255,255,0.8)",
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(255,255,255,0.62)",
-              borderRadius: 30,
-              padding: "60px 35px",
-              textAlign: "center",
-              boxShadow: "0 20px 50px rgba(110,110,180,0.14)",
-            }}
+          <button
+            type="button"
+            onClick={handleWish}
+            style={greenButton}
           >
-            <div style={{ fontSize: 48 }}>💎</div>
+            Ерөөл илгээх
+          </button>
 
-            <p
-              style={{
-                textTransform: "uppercase",
-                letterSpacing: 4,
-                color: "#6870c8",
-                fontWeight: 700,
-              }}
-            >
-              Modern Wedding
-            </p>
-
-            <p style={{ fontSize: 19 }}>
-              Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
-            </p>
-
-            <h1
-              style={{
-                fontSize: 58,
-                margin: "20px 0",
-                color: "#625fb1",
-              }}
-            >
-              {names}
-            </h1>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 16,
-                justifyContent: "center",
-                flexWrap: "wrap",
-                marginTop: 35,
-              }}
-            >
-              <InfoBox title="Огноо" value={date} />
-              <InfoBox title="Цаг" value={time} />
-              <InfoBox title="Байршил" value={venue} />
+          {wishes.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              {wishes.map((wish) => (
+                <div key={wish.id} style={wishCard}>
+                  <strong>{wish.name}</strong>
+                  <p style={{ lineHeight: 1.7 }}>{wish.text}</p>
+                </div>
+              ))}
             </div>
+          )}
+        </section>
 
-            <p style={messageStyle}>{message}</p>
+        <section style={sectionCard}>
+          <h2 style={sectionTitle}>Урилгын линк</h2>
 
-            <button
-              type="button"
-              onClick={() => setStep("form")}
-              style={{
-                ...blackButton,
-                background:
-                  "linear-gradient(90deg,#666ad4,#b26ca4)",
-              }}
-            >
-              ← Засах
-            </button>
+          <p style={sectionSub}>
+            Энэ линкийг зочдод илгээж болно.
+          </p>
+
+          <div style={shareCode}>
+            invite={shareId}
           </div>
-        </div>
-      </main>
+
+          <button
+            type="button"
+            onClick={copyShareLink}
+            style={shareButton}
+          >
+            🔗 Линк хуулах
+          </button>
+        </section>
+
+        <button
+          type="button"
+          onClick={() => setStep("form")}
+          style={blackButton}
+        >
+          ← Засах
+        </button>
+      </section>
+    </main>
+  );
+}
+
+function TemplateHeader({ template }) {
+  if (template === "Цэцгэн чимэг") {
+    return (
+      <>
+        <div style={{ fontSize: 30 }}>🌸 🌿 🌷 🌿 🌸</div>
+        <p style={{ letterSpacing: 4, color: "#a85f76" }}>
+          ХАЙРЫН БАЯР
+        </p>
+      </>
     );
   }
 
-  if (form.template === "Монгол хээ") {
+  if (template === "Modern 3D") {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          padding: "40px 20px",
-          background:
-            "linear-gradient(135deg,#4a0d0a,#851d18,#4a0d0a)",
-          fontFamily: "Georgia, serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            background: "#fff4d7",
-            border: "6px double #c99a32",
-            boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
-          }}
-        >
-          <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
+      <>
+        <div style={{ fontSize: 46 }}>💎</div>
+        <p style={{ letterSpacing: 4, color: "#6870c8" }}>
+          MODERN WEDDING
+        </p>
+      </>
+    );
+  }
 
-          <div style={{ padding: "45px 30px", textAlign: "center" }}>
-            <p
-              style={{
-                color: "#b28628",
-                letterSpacing: 3,
-                fontWeight: 700,
-              }}
-            >
-              МОНГОЛ ХУРИМЫН УРИЛГА
-            </p>
+  if (template === "Монгол хээ") {
+    return (
+      <>
+        <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
+        <p style={{ letterSpacing: 3, color: "#9b7627" }}>
+          МОНГОЛ ХУРИМЫН УРИЛГА
+        </p>
+      </>
+    );
+  }
 
-            <p style={{ fontSize: 18, lineHeight: 1.8 }}>
-              Бидний хуримын баярт хүрэлцэн ирэхийг урьж байна.
-            </p>
-
-            <h1
-              style={{
-                fontSize: 54,
-                color: "#8d2019",
-                margin: "25px 0",
-              }}
-            >
-              {names}
-            </h1>
-
-            <div
-              style={{
-                maxWidth: 430,
-                margin: "30px auto",
-                padding: 24,
-                borderTop: "2px solid #c99a32",
-                borderBottom: "2px solid #c99a32",
-              }}
-            >
-              <h2>{date}</h2>
-              <p>{time}</p>
-              <h3>{venue}</h3>
-            </div>
-
-            <p style={messageStyle}>{message}</p>
-
-            <button
-              type="button"
-              onClick={() => setStep("form")}
-              style={redGoldButton}
-            >
-              ← Засах
-            </button>
-          </div>
-
-          <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
-        </div>
-      </main>
+  if (template === "Казах той") {
+    return (
+      <>
+        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
+        <p style={{ letterSpacing: 3, color: "#c49b3e" }}>
+          ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ
+        </p>
+      </>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px 20px",
-        background:
-          "linear-gradient(135deg,#062b54,#0e608f,#062b54)",
-        fontFamily: "Georgia, serif",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 720,
-          margin: "0 auto",
-          background: "#f5fbff",
-          border: "6px double #d2ae56",
-          boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
-        }}
-      >
-        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
+    <p style={{ letterSpacing: 4, color: "#a48354" }}>
+      WEDDING INVITATION
+    </p>
+  );
+}
 
-        <div style={{ padding: "50px 30px", textAlign: "center" }}>
-          <p
-            style={{
-              color: "#c49b3e",
-              letterSpacing: 3,
-              fontWeight: 700,
-            }}
-          >
-            ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ
-          </p>
+function CountdownBlock({ countdown, hasDate }) {
+  if (!hasDate) {
+    return (
+      <section style={sectionCard}>
+        <h2 style={sectionTitle}>Countdown</h2>
+        <p>Хуримын огноогоо сонгоно уу.</p>
+      </section>
+    );
+  }
 
-          <h1
-            style={{
-              fontSize: 54,
-              color: "#0b5a87",
-              margin: "25px 0",
-            }}
-          >
-            {names}
-          </h1>
+  if (countdown.finished) {
+    return (
+      <section style={sectionCard}>
+        <h2 style={sectionTitle}>Хуримын өдөр ирлээ 🎉</h2>
+      </section>
+    );
+  }
 
-          <p style={{ fontSize: 18, lineHeight: 1.8 }}>
-            Құрметті қонақ, қуанышымызға ортақтасуға шақырамыз.
-          </p>
+  return (
+    <section style={sectionCard}>
+      <h2 style={sectionTitle}>Хурим хүртэл</h2>
 
-          <div
-            style={{
-              margin: "35px auto",
-              padding: 26,
-              maxWidth: 430,
-              border: "2px solid #d2ae56",
-              borderRadius: 20,
-            }}
-          >
-            <h2>{date}</h2>
-            <p>{time}</p>
-            <h3>{venue}</h3>
-          </div>
-
-          <p style={messageStyle}>{message}</p>
-
-          <button
-            type="button"
-            onClick={() => setStep("form")}
-            style={blueGoldButton}
-          >
-            ← Засах
-          </button>
-        </div>
-
-        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
+      <div style={countdownGrid}>
+        <CountBox label="Өдөр" value={countdown.days} />
+        <CountBox label="Цаг" value={countdown.hours} />
+        <CountBox label="Минут" value={countdown.minutes} />
+        <CountBox label="Секунд" value={countdown.seconds} />
       </div>
-    </main>
+    </section>
+  );
+}
+
+function CountBox({ label, value }) {
+  return (
+    <div style={countBox}>
+      <strong style={{ fontSize: 26 }}>{value}</strong>
+      <span style={{ fontSize: 12, color: "#777" }}>{label}</span>
+    </div>
   );
 }
 
 function InfoBox({ title, value }) {
   return (
-    <div
-      style={{
-        minWidth: 150,
-        padding: 18,
-        borderRadius: 18,
-        background: "rgba(255,255,255,0.68)",
-        boxShadow: "0 10px 25px rgba(80,80,150,0.10)",
-      }}
-    >
-      <div style={{ fontSize: 13, color: "#777" }}>{title}</div>
+    <div style={infoBox}>
+      <div style={{ fontSize: 12, color: "#777", marginBottom: 5 }}>
+        {title}
+      </div>
       <strong>{value}</strong>
     </div>
   );
+}
+
+function previewPage(template) {
+  const backgrounds = {
+    "Цагаан сонгодог": "#f7f3ed",
+    "Цэцгэн чимэг":
+      "linear-gradient(135deg,#fff8fa,#fffdfb,#f8eef2)",
+    "Modern 3D":
+      "linear-gradient(135deg,#ccecff,#e6dcff,#ffe2ec)",
+    "Монгол хээ":
+      "linear-gradient(135deg,#4a0d0a,#851d18,#4a0d0a)",
+    "Казах той":
+      "linear-gradient(135deg,#062b54,#0e608f,#062b54)",
+  };
+
+  return {
+    minHeight: "100vh",
+    padding: "40px 16px",
+    background: backgrounds[template] || backgrounds["Цагаан сонгодог"],
+    fontFamily:
+      template === "Modern 3D" ? "Arial, sans-serif" : "Georgia, serif",
+  };
+}
+
+function previewCard(template) {
+  const styles = {
+    "Цагаан сонгодог": {
+      background: "#fff",
+      border: "1px solid #c9b08a",
+    },
+    "Цэцгэн чимэг": {
+      background: "linear-gradient(180deg,#fff,#fff7fa)",
+      border: "1px solid #efc8d2",
+    },
+    "Modern 3D": {
+      background: "rgba(255,255,255,0.68)",
+      border: "1px solid rgba(255,255,255,0.85)",
+      backdropFilter: "blur(18px)",
+    },
+    "Монгол хээ": {
+      background: "#fff4d7",
+      border: "5px double #c99a32",
+    },
+    "Казах той": {
+      background: "#f5fbff",
+      border: "5px double #d2ae56",
+    },
+  };
+
+  return {
+    maxWidth: 760,
+    margin: "0 auto",
+    padding: "50px 28px",
+    textAlign: "center",
+    borderRadius: 28,
+    boxShadow: "0 24px 70px rgba(0,0,0,0.16)",
+    ...styles[template],
+  };
+}
+
+function namesStyle(template) {
+  const colors = {
+    "Цагаан сонгодог": "#6c5135",
+    "Цэцгэн чимэг": "#b85f7c",
+    "Modern 3D": "#625fb1",
+    "Монгол хээ": "#8d2019",
+    "Казах той": "#0b5a87",
+  };
+
+  return {
+    fontSize: "clamp(42px, 7vw, 60px)",
+    margin: "24px 0",
+    color: colors[template] || "#333",
+  };
 }
 
 const pageStyle = {
@@ -665,121 +728,129 @@ const pinkButton = {
   cursor: "pointer",
 };
 
-const goldButton = {
-  ...blackButton,
-  background: "#a98655",
+const greenButton = {
+  width: "100%",
+  marginTop: 12,
+  border: "none",
+  borderRadius: 999,
+  padding: 14,
+  background: "#9cab9b",
+  color: "#fff",
+  fontSize: 17,
+  cursor: "pointer",
 };
 
-const redGoldButton = {
-  ...blackButton,
-  background: "#8d2019",
-  border: "1px solid #d7ae50",
+const mapButton = {
+  display: "inline-block",
+  margin: "14px auto 30px",
+  padding: "14px 22px",
+  borderRadius: 999,
+  background: "#456b57",
+  color: "#fff",
+  textDecoration: "none",
+  fontWeight: 700,
 };
 
-const blueGoldButton = {
-  ...blackButton,
-  background: "#0b5a87",
-  border: "1px solid #d7ae50",
+const shareButton = {
+  ...greenButton,
+  background: "#5c6f8c",
 };
 
-const goldLine = {
-  width: 70,
-  height: 1,
-  background: "#b99b6b",
-  margin: "25px auto",
+const shareCode = {
+  background: "#f4f4f4",
+  padding: 12,
+  borderRadius: 12,
+  fontFamily: "monospace",
+  marginBottom: 10,
+  wordBreak: "break-all",
 };
 
-const pinkLine = {
-  width: 90,
-  height: 1,
-  background: "#d8a4b3",
-  margin: "24px auto",
+const sectionCard = {
+  margin: "30px auto",
+  padding: 24,
+  maxWidth: 620,
+  borderRadius: 22,
+  background: "rgba(255,255,255,0.72)",
+  border: "1px solid rgba(150,150,150,0.18)",
+};
+
+const sectionTitle = {
+  marginTop: 0,
+  marginBottom: 10,
+};
+
+const sectionSub = {
+  color: "#666",
+  lineHeight: 1.6,
+};
+
+const infoGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+  gap: 14,
+  margin: "30px 0",
+};
+
+const infoBox = {
+  padding: 18,
+  borderRadius: 18,
+  background: "rgba(255,255,255,0.75)",
+  boxShadow: "0 8px 22px rgba(0,0,0,0.08)",
+};
+
+const countdownGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4,1fr)",
+  gap: 10,
+  marginTop: 16,
+};
+
+const countBox = {
+  display: "grid",
+  gap: 4,
+  padding: 14,
+  borderRadius: 16,
+  background: "#fff",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+};
+
+const smallCard = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 10,
+  padding: 12,
+  marginBottom: 8,
+  borderRadius: 12,
+  background: "#fff",
+};
+
+const wishCard = {
+  textAlign: "left",
+  padding: 16,
+  marginBottom: 12,
+  borderRadius: 14,
+  background: "#fff",
 };
 
 const messageStyle = {
-  maxWidth: 520,
+  maxWidth: 560,
   margin: "30px auto",
   lineHeight: 1.8,
   fontSize: 18,
 };
 
-const flowerInfoCard = {
-  maxWidth: 470,
-  margin: "0 auto",
-  padding: "26px 22px",
-  borderRadius: 24,
-  background: "linear-gradient(180deg,#fffafb,#fff4f7)",
-  border: "1px solid #efcfd8",
-  boxShadow: "0 14px 32px rgba(177,103,127,0.10)",
-};
-
-const infoItem = {
-  display: "grid",
-  gap: 5,
-  marginBottom: 16,
-};
-
-const infoLabel = {
-  fontSize: 12,
-  letterSpacing: 2,
-  color: "#b07a8c",
-};
-
-const infoValue = {
-  fontSize: 22,
-  color: "#5f4a52",
-};
-
-const cornerFlowerTopLeft = {
-  position: "absolute",
-  top: -20,
-  left: -15,
-  fontSize: 82,
-  opacity: 0.18,
-  transform: "rotate(-18deg)",
-};
-
-const cornerFlowerTopRight = {
-  position: "absolute",
-  top: -18,
-  right: -14,
-  fontSize: 78,
-  opacity: 0.18,
-  transform: "rotate(16deg)",
-};
-
-const cornerFlowerBottomLeft = {
-  position: "absolute",
-  bottom: -18,
-  left: -10,
-  fontSize: 78,
-  opacity: 0.16,
-  transform: "rotate(18deg)",
-};
-
-const cornerFlowerBottomRight = {
-  position: "absolute",
-  bottom: -18,
-  right: -10,
-  fontSize: 80,
-  opacity: 0.16,
-  transform: "rotate(-16deg)",
-};
-
 const mongolPattern = {
   textAlign: "center",
   color: "#c99a32",
-  fontSize: 22,
-  letterSpacing: 8,
-  padding: "12px 0",
-  background: "#7b1712",
+  fontSize: 20,
+  letterSpacing: 7,
+  marginBottom: 16,
 };
 
 const kazakhPattern = {
   textAlign: "center",
   color: "#d2ae56",
-  fontSize: 22,
-  letterSpacing: 8,
-  padding: "12px 0",
-  background: "#083b68",
+  fontSize: 20,
+  letterSpacing: 7,
+  marginBottom: 16,
 };
