@@ -41,6 +41,7 @@ export default function Home() {
   const date = form.date || "2026-10-10";
   const time = form.time || "17:00";
   const venue = form.venue || "Хуримын ордон";
+
   const message =
     form.message ||
     "Эрхэм хүндэт таныг бидний хуримын баярт хүрэлцэн ирэхийг хүндэтгэн урьж байна.";
@@ -264,16 +265,13 @@ export default function Home() {
             </label>
 
             {form.photo && (
-              <img
-                src={form.photo}
-                alt="Хосын зураг"
-                style={{
-                  width: "100%",
-                  maxHeight: 280,
-                  objectFit: "cover",
-                  borderRadius: 18,
-                }}
-              />
+              <div style={photoPreviewBox}>
+                <img
+                  src={form.photo}
+                  alt="Хосын зураг"
+                  style={photoPreviewStyle}
+                />
+              </div>
             )}
 
             <textarea
@@ -336,20 +334,13 @@ export default function Home() {
         <h1 style={namesStyle(form.template)}>{names}</h1>
 
         {form.photo && (
-          <img
-            src={form.photo}
-            alt="Хосын зураг"
-            style={{
-              width: "100%",
-              maxWidth: 560,
-              height: 360,
-              objectFit: "cover",
-              borderRadius: 26,
-              margin: "20px auto 30px",
-              display: "block",
-              boxShadow: "0 18px 45px rgba(0,0,0,0.15)",
-            }}
-          />
+          <div style={fullPhotoBox}>
+            <img
+              src={form.photo}
+              alt="Хосын зураг"
+              style={fullPhotoStyle}
+            />
+          </div>
         )}
 
         <div style={infoGrid}>
@@ -360,7 +351,10 @@ export default function Home() {
 
         <p style={messageStyle}>{message}</p>
 
-        <CountdownBlock countdown={countdown} hasDate={!!targetDate} />
+        <CountdownBlock
+          countdown={countdown}
+          hasDate={!!targetDate}
+        />
 
         {form.mapUrl && (
           <a
@@ -436,7 +430,13 @@ export default function Home() {
             style={inputStyle}
           />
 
-          <div style={{ textAlign: "right", color: "#888", fontSize: 13 }}>
+          <div
+            style={{
+              textAlign: "right",
+              color: "#888",
+              fontSize: 13,
+            }}
+          >
             {wishText.length}/500
           </div>
 
@@ -453,7 +453,9 @@ export default function Home() {
               {wishes.map((wish) => (
                 <div key={wish.id} style={wishCard}>
                   <strong>{wish.name}</strong>
-                  <p style={{ lineHeight: 1.7 }}>{wish.text}</p>
+                  <p style={{ lineHeight: 1.7 }}>
+                    {wish.text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -496,8 +498,15 @@ function TemplateHeader({ template }) {
   if (template === "Цэцгэн чимэг") {
     return (
       <>
-        <div style={{ fontSize: 30 }}>🌸 🌿 🌷 🌿 🌸</div>
-        <p style={{ letterSpacing: 4, color: "#a85f76" }}>
+        <div style={{ fontSize: 30 }}>
+          🌸 🌿 🌷 🌿 🌸
+        </div>
+        <p
+          style={{
+            letterSpacing: 4,
+            color: "#a85f76",
+          }}
+        >
           ХАЙРЫН БАЯР
         </p>
       </>
@@ -508,7 +517,12 @@ function TemplateHeader({ template }) {
     return (
       <>
         <div style={{ fontSize: 46 }}>💎</div>
-        <p style={{ letterSpacing: 4, color: "#6870c8" }}>
+        <p
+          style={{
+            letterSpacing: 4,
+            color: "#6870c8",
+          }}
+        >
           MODERN WEDDING
         </p>
       </>
@@ -518,8 +532,15 @@ function TemplateHeader({ template }) {
   if (template === "Монгол хээ") {
     return (
       <>
-        <div style={mongolPattern}>◆ ◈ ◆ ◈ ◆ ◈ ◆</div>
-        <p style={{ letterSpacing: 3, color: "#9b7627" }}>
+        <div style={mongolPattern}>
+          ◆ ◈ ◆ ◈ ◆ ◈ ◆
+        </div>
+        <p
+          style={{
+            letterSpacing: 3,
+            color: "#9b7627",
+          }}
+        >
           МОНГОЛ ХУРИМЫН УРИЛГА
         </p>
       </>
@@ -529,8 +550,15 @@ function TemplateHeader({ template }) {
   if (template === "Казах той") {
     return (
       <>
-        <div style={kazakhPattern}>✦ ❖ ✦ ❖ ✦ ❖ ✦</div>
-        <p style={{ letterSpacing: 3, color: "#c49b3e" }}>
+        <div style={kazakhPattern}>
+          ✦ ❖ ✦ ❖ ✦ ❖ ✦
+        </div>
+        <p
+          style={{
+            letterSpacing: 3,
+            color: "#c49b3e",
+          }}
+        >
           ҮЙЛЕНУ ТОЙЫНА ШАҚЫРУ
         </p>
       </>
@@ -538,7 +566,12 @@ function TemplateHeader({ template }) {
   }
 
   return (
-    <p style={{ letterSpacing: 4, color: "#a48354" }}>
+    <p
+      style={{
+        letterSpacing: 4,
+        color: "#a48354",
+      }}
+    >
       WEDDING INVITATION
     </p>
   );
@@ -557,7 +590,9 @@ function CountdownBlock({ countdown, hasDate }) {
   if (countdown.finished) {
     return (
       <section style={sectionCard}>
-        <h2 style={sectionTitle}>Хуримын өдөр ирлээ 🎉</h2>
+        <h2 style={sectionTitle}>
+          Хуримын өдөр ирлээ 🎉
+        </h2>
       </section>
     );
   }
@@ -567,10 +602,22 @@ function CountdownBlock({ countdown, hasDate }) {
       <h2 style={sectionTitle}>Хурим хүртэл</h2>
 
       <div style={countdownGrid}>
-        <CountBox label="Өдөр" value={countdown.days} />
-        <CountBox label="Цаг" value={countdown.hours} />
-        <CountBox label="Минут" value={countdown.minutes} />
-        <CountBox label="Секунд" value={countdown.seconds} />
+        <CountBox
+          label="Өдөр"
+          value={countdown.days}
+        />
+        <CountBox
+          label="Цаг"
+          value={countdown.hours}
+        />
+        <CountBox
+          label="Минут"
+          value={countdown.minutes}
+        />
+        <CountBox
+          label="Секунд"
+          value={countdown.seconds}
+        />
       </div>
     </section>
   );
@@ -579,8 +626,17 @@ function CountdownBlock({ countdown, hasDate }) {
 function CountBox({ label, value }) {
   return (
     <div style={countBox}>
-      <strong style={{ fontSize: 26 }}>{value}</strong>
-      <span style={{ fontSize: 12, color: "#777" }}>{label}</span>
+      <strong style={{ fontSize: 26 }}>
+        {value}
+      </strong>
+      <span
+        style={{
+          fontSize: 12,
+          color: "#777",
+        }}
+      >
+        {label}
+      </span>
     </div>
   );
 }
@@ -588,7 +644,13 @@ function CountBox({ label, value }) {
 function InfoBox({ title, value }) {
   return (
     <div style={infoBox}>
-      <div style={{ fontSize: 12, color: "#777", marginBottom: 5 }}>
+      <div
+        style={{
+          fontSize: 12,
+          color: "#777",
+          marginBottom: 5,
+        }}
+      >
         {title}
       </div>
       <strong>{value}</strong>
@@ -612,9 +674,13 @@ function previewPage(template) {
   return {
     minHeight: "100vh",
     padding: "40px 16px",
-    background: backgrounds[template] || backgrounds["Цагаан сонгодог"],
+    background:
+      backgrounds[template] ||
+      backgrounds["Цагаан сонгодог"],
     fontFamily:
-      template === "Modern 3D" ? "Arial, sans-serif" : "Georgia, serif",
+      template === "Modern 3D"
+        ? "Arial, sans-serif"
+        : "Georgia, serif",
   };
 }
 
@@ -624,19 +690,25 @@ function previewCard(template) {
       background: "#fff",
       border: "1px solid #c9b08a",
     },
+
     "Цэцгэн чимэг": {
-      background: "linear-gradient(180deg,#fff,#fff7fa)",
+      background:
+        "linear-gradient(180deg,#fff,#fff7fa)",
       border: "1px solid #efc8d2",
     },
+
     "Modern 3D": {
       background: "rgba(255,255,255,0.68)",
-      border: "1px solid rgba(255,255,255,0.85)",
+      border:
+        "1px solid rgba(255,255,255,0.85)",
       backdropFilter: "blur(18px)",
     },
+
     "Монгол хээ": {
       background: "#fff4d7",
       border: "5px double #c99a32",
     },
+
     "Казах той": {
       background: "#f5fbff",
       border: "5px double #d2ae56",
@@ -649,7 +721,8 @@ function previewCard(template) {
     padding: "50px 28px",
     textAlign: "center",
     borderRadius: 28,
-    boxShadow: "0 24px 70px rgba(0,0,0,0.16)",
+    boxShadow:
+      "0 24px 70px rgba(0,0,0,0.16)",
     ...styles[template],
   };
 }
@@ -672,7 +745,8 @@ function namesStyle(template) {
 
 const pageStyle = {
   minHeight: "100vh",
-  background: "linear-gradient(180deg,#fffaf7,#f5ebe5)",
+  background:
+    "linear-gradient(180deg,#fffaf7,#f5ebe5)",
   fontFamily: "Arial, sans-serif",
   padding: 24,
 };
@@ -688,7 +762,8 @@ const formCard = {
   background: "#fff",
   padding: 30,
   borderRadius: 22,
-  boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+  boxShadow:
+    "0 10px 40px rgba(0,0,0,0.08)",
 };
 
 const formStyle = {
@@ -705,6 +780,46 @@ const inputStyle = {
   border: "1px solid #ddd",
   fontSize: 16,
   marginTop: 6,
+};
+
+const photoPreviewBox = {
+  width: "100%",
+  background: "#f5f5f5",
+  borderRadius: 18,
+  padding: 10,
+  boxSizing: "border-box",
+};
+
+const photoPreviewStyle = {
+  width: "100%",
+  height: "auto",
+  maxHeight: 520,
+  objectFit: "contain",
+  display: "block",
+  margin: "0 auto",
+  borderRadius: 14,
+};
+
+const fullPhotoBox = {
+  width: "100%",
+  maxWidth: 620,
+  margin: "20px auto 30px",
+  padding: 10,
+  borderRadius: 26,
+  background: "rgba(255,255,255,0.55)",
+  boxSizing: "border-box",
+};
+
+const fullPhotoStyle = {
+  width: "100%",
+  height: "auto",
+  maxHeight: 720,
+  objectFit: "contain",
+  display: "block",
+  margin: "0 auto",
+  borderRadius: 20,
+  boxShadow:
+    "0 18px 45px rgba(0,0,0,0.12)",
 };
 
 const blackButton = {
@@ -770,8 +885,10 @@ const sectionCard = {
   padding: 24,
   maxWidth: 620,
   borderRadius: 22,
-  background: "rgba(255,255,255,0.72)",
-  border: "1px solid rgba(150,150,150,0.18)",
+  background:
+    "rgba(255,255,255,0.72)",
+  border:
+    "1px solid rgba(150,150,150,0.18)",
 };
 
 const sectionTitle = {
@@ -786,7 +903,8 @@ const sectionSub = {
 
 const infoGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(150px,1fr))",
   gap: 14,
   margin: "30px 0",
 };
@@ -794,13 +912,16 @@ const infoGrid = {
 const infoBox = {
   padding: 18,
   borderRadius: 18,
-  background: "rgba(255,255,255,0.75)",
-  boxShadow: "0 8px 22px rgba(0,0,0,0.08)",
+  background:
+    "rgba(255,255,255,0.75)",
+  boxShadow:
+    "0 8px 22px rgba(0,0,0,0.08)",
 };
 
 const countdownGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(4,1fr)",
+  gridTemplateColumns:
+    "repeat(4,minmax(0,1fr))",
   gap: 10,
   marginTop: 16,
 };
@@ -811,7 +932,8 @@ const countBox = {
   padding: 14,
   borderRadius: 16,
   background: "#fff",
-  boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+  boxShadow:
+    "0 6px 18px rgba(0,0,0,0.06)",
 };
 
 const smallCard = {
