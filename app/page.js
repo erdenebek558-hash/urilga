@@ -57,10 +57,6 @@ export default function Home() {
     }));
   }
 
-  // ==============================
-  // IMAGE
-  // ==============================
-
   function readImage(file, callback) {
     if (!file) return;
 
@@ -129,6 +125,10 @@ export default function Home() {
       ...prev,
       gallery: photos,
     }));
+
+    if (galleryInput.current) {
+      galleryInput.current.value = "";
+    }
   }
 
   function removeHero() {
@@ -160,10 +160,6 @@ export default function Home() {
     }));
   }
 
-  // ==============================
-  // COUNTDOWN
-  // ==============================
-
   useEffect(() => {
     if (!form.date) {
       setCountdown({
@@ -179,7 +175,6 @@ export default function Home() {
 
     function calculate() {
       const selectedTime = form.time || "00:00";
-
       const target = new Date(
         `${form.date}T${selectedTime}:00`
       ).getTime();
@@ -214,10 +209,6 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [form.date, form.time]);
 
-  // ==============================
-  // RSVP
-  // ==============================
-
   function sendRsvp() {
     if (!rsvpName.trim()) {
       alert("Нэрээ бичнэ үү.");
@@ -233,10 +224,6 @@ export default function Home() {
     setRsvpName("");
     setRsvpStatus("Ирнэ");
   }
-
-  // ==============================
-  // WISH
-  // ==============================
 
   function sendWish() {
     if (!wishName.trim()) {
@@ -261,10 +248,6 @@ export default function Home() {
     setWishName("");
     setWishText("");
   }
-
-  // ==============================
-  // SHARE
-  // ==============================
 
   function buildShareLink() {
     const slug = encodeURIComponent(
@@ -307,10 +290,6 @@ export default function Home() {
     copyShareLink();
   }
 
-  // ==============================
-  // HOME
-  // ==============================
-
   if (screen === "home") {
     return (
       <>
@@ -320,12 +299,15 @@ export default function Home() {
           <section className="home-card">
             <div className="home-ring">💍</div>
 
-            <div className="tiny-title">WEDDING INVITATION</div>
+            <div className="tiny-title">
+              WEDDING INVITATION
+            </div>
 
             <h1>Хуримын урилга</h1>
 
             <p>
-              Өөрийн хуримын онлайн урилгыг хэдхэн алхмаар бүтээнэ үү.
+              Өөрийн хуримын онлайн урилгыг хэдхэн алхмаар
+              бүтээнэ үү.
             </p>
 
             <button onClick={() => setScreen("form")}>
@@ -336,10 +318,6 @@ export default function Home() {
       </>
     );
   }
-
-  // ==============================
-  // FORM
-  // ==============================
 
   if (screen === "form") {
     return (
@@ -356,7 +334,8 @@ export default function Home() {
               <h1>Урилгын мэдээлэл</h1>
 
               <p>
-                Мэдээллээ бөглөж, зурагнуудаа сонгоод урилгаа харна уу.
+                Мэдээллээ бөглөж, зурагнуудаа сонгоод урилгаа
+                харна уу.
               </p>
             </div>
 
@@ -461,7 +440,9 @@ export default function Home() {
 
                 <button
                   className="choose-photo"
-                  onClick={() => galleryInput.current?.click()}
+                  onClick={() =>
+                    galleryInput.current?.click()
+                  }
                 >
                   ＋ Зургууд сонгох
                 </button>
@@ -519,10 +500,6 @@ export default function Home() {
     );
   }
 
-  // ==============================
-  // PREVIEW
-  // ==============================
-
   return (
     <>
       <style>{css}</style>
@@ -540,8 +517,6 @@ export default function Home() {
 
           <div className="music-note">♪</div>
         </header>
-
-        {/* HERO */}
 
         <section className="hero-section">
           <div className="hero-frame">
@@ -573,8 +548,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* GREETING */}
-
         <section className="content-section">
           <div className="greeting-card">
             <div className="ornament">✦</div>
@@ -592,8 +565,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* DATE + TIME */}
 
         <section className="content-section">
           <div className="date-time-card">
@@ -622,8 +593,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* COUNTDOWN */}
 
         <section className="countdown-section">
           <div className="section-label gold">
@@ -663,8 +632,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* VENUE */}
-
         <section className="content-section">
           <div className="venue-card">
             <div className="venue-photo-area">
@@ -686,7 +653,8 @@ export default function Home() {
               </div>
 
               <h2>
-                {form.venueName || "Хурим болох газар"}
+                {form.venueName ||
+                  "Хурим болох газар"}
               </h2>
 
               <p>
@@ -707,8 +675,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* GALLERY */}
 
         {form.gallery.length > 0 && (
           <section className="gallery-section">
@@ -761,8 +727,6 @@ export default function Home() {
             </div>
           </section>
         )}
-
-        {/* RSVP */}
 
         <section className="rsvp-section">
           <div className="rsvp-card">
@@ -825,8 +789,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* WISH */}
-
         <section className="wish-section">
           <div className="wish-heading">
             <span />
@@ -841,7 +803,9 @@ export default function Home() {
                   className="wish-card"
                   key={wish.id}
                 >
-                  <div className="quote-mark">”</div>
+                  <div className="quote-mark">
+                    ”
+                  </div>
 
                   <p>“{wish.text}”</p>
 
@@ -897,8 +861,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SHARE */}
-
         <section className="share-section">
           <div className="section-label gold">
             УРИЛГАА ХУВААЛЦАХ
@@ -915,10 +877,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* FOOTER */}
-
         <footer className="footer">
-          <div className="footer-heart">♥</div>
+          <div className="footer-heart">
+            ♥
+          </div>
 
           <div className="footer-names">
             {names}
@@ -941,10 +903,6 @@ export default function Home() {
     </>
   );
 }
-
-// ==============================
-// COMPONENTS
-// ==============================
 
 function Field({
   label,
@@ -1069,7 +1027,9 @@ function RsvpOption({
 function formatDate(date) {
   if (!date) return "Огноо";
 
-  const value = new Date(`${date}T00:00:00`);
+  const value = new Date(
+    `${date}T00:00:00`
+  );
 
   if (Number.isNaN(value.getTime())) {
     return date;
@@ -1092,10 +1052,6 @@ function formatDate(date) {
 
   return `${months[value.getMonth()]} ${value.getDate()}, ${value.getFullYear()}`;
 }
-
-// ==============================
-// CSS
-// ==============================
 
 const css = `
 * {
@@ -1129,19 +1085,25 @@ button {
   --line: #ded2bb;
 }
 
+/* HOME */
+
 .home-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 20px;
-  background: linear-gradient(160deg,#fffdf9,#f1e6dc);
-  font-family: Arial,sans-serif;
+  background: linear-gradient(
+    160deg,
+    #fffdf9,
+    #f1e6dc
+  );
+  font-family: Arial, sans-serif;
 }
 
 .home-card {
-  width: min(600px,100%);
-  text-align: center;
+  width: min(600px, 100%);
   padding: 50px 25px;
+  text-align: center;
 }
 
 .home-ring {
@@ -1151,8 +1113,8 @@ button {
 .home-card h1 {
   margin: 18px 0 10px;
   color: var(--green);
-  font-family: Georgia,serif;
-  font-size: clamp(38px,7vw,60px);
+  font-family: Georgia, serif;
+  font-size: clamp(38px, 7vw, 60px);
   font-weight: 500;
 }
 
@@ -1173,7 +1135,7 @@ button {
 
 .tiny-title,
 .section-label {
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 4px;
@@ -1183,11 +1145,13 @@ button {
   color: var(--gold);
 }
 
+/* FORM */
+
 .form-page {
   min-height: 100vh;
   padding: 28px 15px 60px;
   background: #f5ede6;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 .editor-card {
@@ -1200,8 +1164,8 @@ button {
 }
 
 .editor-head {
-  text-align: center;
   margin-bottom: 30px;
+  text-align: center;
 }
 
 .editor-head h1 {
@@ -1263,8 +1227,8 @@ button {
 }
 
 .upload-card h3 {
-  color: var(--green);
   margin: 8px 0;
+  color: var(--green);
 }
 
 .upload-card p {
@@ -1305,8 +1269,8 @@ button {
 
 .upload-actions button {
   padding: 12px;
-  border-radius: 12px;
   border: 1px solid #ccc;
+  border-radius: 12px;
   background: white;
 }
 
@@ -1319,7 +1283,8 @@ button {
 .gallery-editor {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(105px,1fr));
+  grid-template-columns:
+    repeat(auto-fit, minmax(105px, 1fr));
   gap: 10px;
 }
 
@@ -1352,17 +1317,23 @@ button {
   padding: 17px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg,#b97887,#d49aa2);
+  background: linear-gradient(
+    90deg,
+    #b97887,
+    #d49aa2
+  );
   color: white;
-  font-weight: 700;
   font-size: 17px;
+  font-weight: 700;
 }
+
+/* INVITATION */
 
 .invitation {
   min-height: 100vh;
   background: var(--cream);
   color: var(--green);
-  font-family: Georgia,serif;
+  font-family: Georgia, serif;
 }
 
 .topbar {
@@ -1387,7 +1358,7 @@ button {
 
 .topbar-name {
   text-align: center;
-  font-size: clamp(22px,4vw,34px);
+  font-size: clamp(22px, 4vw, 34px);
   font-style: italic;
 }
 
@@ -1399,54 +1370,54 @@ button {
 /* HERO */
 
 .hero-section {
-  width: min(920px,100%);
+  width: min(920px, 100%);
   margin: auto;
-  padding: 22px 18px 55px;
+  padding: 22px 18px 45px;
 }
 
 .hero-frame {
   width: 100%;
-  min-height: 300px;
+  min-height: 260px;
   display: grid;
   place-items: center;
   padding: 10px;
   overflow: hidden;
-  border-radius: 26px;
-  background: #eee8e1;
+  border-radius: 24px;
+  background: #f3eee8;
 }
 
 .hero-image {
   width: 100%;
   height: auto;
-  max-height: 720px;
+  max-height: 520px;
   object-fit: contain;
   display: block;
-  border-radius: 20px;
+  border-radius: 18px;
 }
 
 .hero-placeholder {
-  min-height: 450px;
+  min-height: 300px;
   display: grid;
   place-items: center;
   color: #999;
 }
 
 .hero-text {
-  padding: 32px 20px 5px;
+  padding: 24px 20px 5px;
   text-align: center;
 }
 
 .hero-label {
   color: #987612;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   letter-spacing: 5px;
   font-size: 11px;
   font-weight: 700;
 }
 
 .hero-text h1 {
-  margin: 16px 0 14px;
-  font-size: clamp(38px,7vw,65px);
+  margin: 12px 0;
+  font-size: clamp(36px, 6vw, 58px);
   font-weight: 500;
   font-style: italic;
 }
@@ -1465,8 +1436,10 @@ button {
   background: #d3b552;
 }
 
+/* CONTENT */
+
 .content-section {
-  width: min(760px,calc(100% - 30px));
+  width: min(760px, calc(100% - 30px));
   margin: auto;
   padding: 28px 0;
 }
@@ -1478,7 +1451,11 @@ button {
   text-align: center;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(180deg,#fffdf9,#faf3e8);
+  background: linear-gradient(
+    180deg,
+    #fffdf9,
+    #faf3e8
+  );
   box-shadow: 0 12px 35px rgba(0,0,0,.04);
 }
 
@@ -1515,8 +1492,8 @@ button {
   max-width: 580px;
   margin: auto;
   color: #504c46;
-  line-height: 1.9;
-  font-size: clamp(18px,3vw,23px);
+  line-height: 1.75;
+  font-size: clamp(18px, 3vw, 22px);
   font-style: italic;
 }
 
@@ -1545,7 +1522,7 @@ button {
 .date-block strong {
   display: block;
   margin-top: 14px;
-  font-size: clamp(21px,4vw,30px);
+  font-size: clamp(21px, 4vw, 30px);
   font-weight: 500;
 }
 
@@ -1558,7 +1535,7 @@ button {
 /* COUNTDOWN */
 
 .countdown-section {
-  width: min(760px,calc(100% - 30px));
+  width: min(760px, calc(100% - 30px));
   margin: auto;
   padding: 35px 0 65px;
   text-align: center;
@@ -1567,7 +1544,7 @@ button {
 .countdown-grid {
   margin-top: 25px;
   display: grid;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
@@ -1580,14 +1557,14 @@ button {
 
 .count-box strong {
   display: block;
-  font-size: clamp(27px,5vw,43px);
+  font-size: clamp(27px, 5vw, 43px);
 }
 
 .count-box span {
   display: block;
   margin-top: 5px;
   color: #777;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 11px;
 }
 
@@ -1613,11 +1590,11 @@ button {
 }
 
 .venue-photo-area {
-  height: 390px;
-  padding: 16px;
+  height: 350px;
+  padding: 14px;
   display: grid;
   place-items: center;
-  background: #f2ece6;
+  background: #f3eee8;
 }
 
 .venue-photo-area img {
@@ -1625,7 +1602,7 @@ button {
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 18px;
+  border-radius: 16px;
 }
 
 .venue-placeholder {
@@ -1638,7 +1615,7 @@ button {
 
 .venue-body h2 {
   margin: 20px 0 10px;
-  font-size: clamp(29px,5vw,42px);
+  font-size: clamp(29px, 5vw, 42px);
   font-style: italic;
   font-weight: 500;
 }
@@ -1661,7 +1638,7 @@ button {
   color: #f4d36f;
   text-align: center;
   text-decoration: none;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   letter-spacing: 3px;
 }
@@ -1684,7 +1661,7 @@ button {
 
 .gallery-heading h2 {
   margin: 10px 0 0;
-  font-size: clamp(29px,5vw,42px);
+  font-size: clamp(29px, 5vw, 42px);
   font-style: italic;
   font-weight: 500;
 }
@@ -1713,9 +1690,9 @@ button {
 }
 
 .gallery-photo {
-  flex: 0 0 360px;
-  width: 360px;
-  height: 470px;
+  flex: 0 0 340px;
+  width: 340px;
+  height: 430px;
   padding: 10px;
   display: grid;
   place-items: center;
@@ -1749,7 +1726,7 @@ button {
 .rsvp-card h2 {
   margin: 0;
   text-align: center;
-  font-size: clamp(48px,8vw,68px);
+  font-size: clamp(48px, 8vw, 68px);
   font-style: italic;
   font-weight: 500;
 }
@@ -1764,7 +1741,7 @@ button {
 .field-heading {
   margin: 28px 0 12px;
   text-align: center;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 4px;
@@ -1787,7 +1764,7 @@ button {
   border: 2px solid #d6ded9;
   border-radius: 18px;
   background: white;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 .rsvp-option.selected {
@@ -1818,7 +1795,7 @@ button {
   border-radius: 999px;
   background: #9cab9b;
   color: white;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   letter-spacing: 3px;
 }
@@ -1841,7 +1818,7 @@ button {
   align-items: center;
   gap: 14px;
   margin-bottom: 35px;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   letter-spacing: 5px;
 }
@@ -1875,14 +1852,14 @@ button {
 
 .wish-card p {
   text-align: center;
-  font-size: clamp(22px,4vw,31px);
+  font-size: clamp(22px, 4vw, 31px);
   line-height: 1.6;
   font-style: italic;
 }
 
 .wish-author {
   text-align: center;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 12px;
   letter-spacing: 4px;
 }
@@ -1899,7 +1876,7 @@ button {
 .wish-form-title {
   margin-bottom: 25px;
   text-align: center;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   letter-spacing: 4px;
 }
@@ -1908,7 +1885,7 @@ button {
   display: block;
   margin-top: 18px;
   color: #8d8b80;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 11px;
   letter-spacing: 3px;
 }
@@ -1922,7 +1899,7 @@ button {
   background: transparent;
   outline: none;
   color: #555;
-  font-family: Georgia,serif;
+  font-family: Georgia, serif;
   font-size: 18px;
 }
 
@@ -1937,7 +1914,7 @@ button {
   margin-top: 5px;
   text-align: right;
   color: #999;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 11px;
 }
 
@@ -1962,7 +1939,7 @@ button {
   border-radius: 999px;
   background: var(--green);
   color: #f4d36f;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   letter-spacing: 2px;
 }
@@ -1972,7 +1949,11 @@ button {
 .footer {
   padding: 70px 25px 50px;
   text-align: center;
-  background: linear-gradient(135deg,#073f2d,#18320f);
+  background: linear-gradient(
+    135deg,
+    #073f2d,
+    #18320f
+  );
   color: #efd170;
 }
 
@@ -1982,12 +1963,12 @@ button {
 
 .footer-names {
   margin-top: 15px;
-  font-size: clamp(35px,7vw,55px);
+  font-size: clamp(35px, 7vw, 55px);
   font-style: italic;
 }
 
 .footer p {
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 10px;
   letter-spacing: 3px;
 }
@@ -2022,16 +2003,20 @@ button {
   }
 
   .hero-frame {
+    min-height: 240px;
     border-radius: 18px;
   }
 
   .hero-image {
-    max-height: 620px;
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: contain;
     border-radius: 14px;
   }
 
   .hero-text {
-    padding-top: 25px;
+    padding-top: 22px;
   }
 
   .date-time-card {
@@ -2053,7 +2038,13 @@ button {
   }
 
   .venue-photo-area {
-    height: 330px;
+    height: 300px;
+  }
+
+  .venue-photo-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .venue-body {
@@ -2071,9 +2062,15 @@ button {
   }
 
   .gallery-photo {
-    flex-basis: 78vw;
+    flex: 0 0 78vw;
     width: 78vw;
-    height: 440px;
+    height: 400px;
+  }
+
+  .gallery-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .rsvp-card {
