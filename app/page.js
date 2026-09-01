@@ -209,9 +209,7 @@ export default function Home() {
 
   function turnPage(targetIndex, direction = "next") {
     if (flip.active) return;
-
     if (!form.gallery.length) return;
-
     if (targetIndex === galleryIndex) return;
 
     setFlip({
@@ -234,7 +232,7 @@ export default function Home() {
         to: targetIndex,
         direction,
       });
-    }, 720);
+    }, 760);
   }
 
   function previousGallery() {
@@ -458,7 +456,7 @@ export default function Home() {
               <h1>Урилгын загвар сонгох</h1>
 
               <p>
-                Доорх 5 загвараас сонгоно уу.
+                Доорх 5 загвараас өөрт таалагдсанаа сонгоно уу.
               </p>
             </div>
 
@@ -487,7 +485,6 @@ export default function Home() {
                     <div className="template-mini-line" />
 
                     <div className="template-mini-box" />
-
                     <div className="template-mini-box small" />
                   </div>
 
@@ -646,8 +643,8 @@ export default function Home() {
                 <h3>Бидний түүхийн зургууд</h3>
 
                 <p>
-                  Дээд тал нь 8 зураг. Урилга дээр нэг
-                  нэгээрээ хуудас шиг эргэнэ.
+                  Дээд тал нь 8 зураг. Нэг нэгээрээ номын хуудас
+                  шиг эргэж харагдана.
                 </p>
 
                 <input
@@ -785,11 +782,11 @@ export default function Home() {
 
             <div className="short-line" />
 
+            <h3>{names}</h3>
+
             <p>{greeting}</p>
 
-            <div className="ornament bottom">
-              ❦
-            </div>
+            <div className="ornament bottom">❦</div>
           </div>
         </section>
 
@@ -799,7 +796,7 @@ export default function Home() {
               <div className="date-icon">▣</div>
 
               <div className="section-label">
-                ОГНОО
+                ОГНОО / DATE
               </div>
 
               <strong>{formatDate(form.date)}</strong>
@@ -811,11 +808,11 @@ export default function Home() {
               <div className="date-icon">◷</div>
 
               <div className="section-label">
-                ЦАГ
+                ЦАГ / TIME
               </div>
 
               <strong>
-                {form.time || "17:00"}
+                {form.time || "17:00"} ЦАГТ
               </strong>
             </div>
           </div>
@@ -876,7 +873,7 @@ export default function Home() {
 
             <div className="venue-body">
               <div className="section-label left">
-                ★ БАЙРШИЛ
+                ★ БАЙРШИЛ / VENUE
               </div>
 
               <h2>
@@ -912,7 +909,7 @@ export default function Home() {
 
               <h2>Хуримын дурсамжууд</h2>
 
-              <p>← Зургийг эргүүлж үзээрэй →</p>
+              <p>Зургийг хуудас шиг эргүүлж үзээрэй</p>
             </div>
 
             <div className="book-area">
@@ -924,45 +921,52 @@ export default function Home() {
                 ‹
               </button>
 
-              <div className="book">
-                <div className="book-base">
-                  <img
-                    src={
-                      form.gallery[
-                        flip.active
-                          ? flip.to
-                          : galleryIndex
-                      ]?.src
-                    }
-                    alt=""
-                  />
-                </div>
+              <div className="album-shell">
+                <div className="album-corner top-left" />
+                <div className="album-corner top-right" />
+                <div className="album-corner bottom-left" />
+                <div className="album-corner bottom-right" />
 
-                {flip.active && (
-                  <div
-                    className={`turning-page turning-${flip.direction}`}
-                  >
-                    <div className="turning-front">
-                      <img
-                        src={
-                          form.gallery[flip.from]?.src
-                        }
-                        alt=""
-                      />
-                    </div>
-
-                    <div className="turning-back">
-                      <img
-                        src={
-                          form.gallery[flip.to]?.src
-                        }
-                        alt=""
-                      />
-                    </div>
+                <div className="book">
+                  <div className="book-base">
+                    <img
+                      src={
+                        form.gallery[
+                          flip.active
+                            ? flip.to
+                            : galleryIndex
+                        ]?.src
+                      }
+                      alt=""
+                    />
                   </div>
-                )}
 
-                <div className="book-spine" />
+                  {flip.active && (
+                    <div
+                      className={`turning-page turning-${flip.direction}`}
+                    >
+                      <div className="turning-front">
+                        <img
+                          src={
+                            form.gallery[flip.from]?.src
+                          }
+                          alt=""
+                        />
+                      </div>
+
+                      <div className="turning-back">
+                        <img
+                          src={
+                            form.gallery[flip.to]?.src
+                          }
+                          alt=""
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="book-spine" />
+                </div>
               </div>
 
               <button
@@ -1012,15 +1016,15 @@ export default function Home() {
             <h2>RSVP</h2>
 
             <p className="rsvp-intro">
-              Таны ирэх нь бидний хувьд хүндэтгэл!
+              Таны ирэх нь бидний хувьд том хүндэтгэл!
             </p>
 
             <div className="field-heading">
-              НЭР
+              НЭРЭЭ БИЧНЭ ҮҮ
             </div>
 
             <input
-              className="large-input"
+              className="rsvp-name-input"
               value={rsvpName}
               onChange={(e) =>
                 setRsvpName(e.target.value)
@@ -1032,29 +1036,31 @@ export default function Home() {
               ХУРИМД ИРЭХ ҮҮ?
             </div>
 
-            <RsvpOption
-              value="Ирнэ"
-              subtitle="Хуримд оролцоно"
-              selected={rsvpStatus}
-              setSelected={setRsvpStatus}
-            />
+            <div className="rsvp-options">
+              <RsvpOption
+                value="Ирнэ"
+                subtitle="Хуримд оролцоно"
+                selected={rsvpStatus}
+                setSelected={setRsvpStatus}
+              />
 
-            <RsvpOption
-              value="Одоогоор мэдэхгүй"
-              subtitle="Тодорхойгүй"
-              selected={rsvpStatus}
-              setSelected={setRsvpStatus}
-            />
+              <RsvpOption
+                value="Одоогоор мэдэхгүй"
+                subtitle="Одоохондоо тодорхойгүй"
+                selected={rsvpStatus}
+                setSelected={setRsvpStatus}
+              />
 
-            <RsvpOption
-              value="Ирэхгүй"
-              subtitle="Оролцох боломжгүй"
-              selected={rsvpStatus}
-              setSelected={setRsvpStatus}
-            />
+              <RsvpOption
+                value="Ирэхгүй"
+                subtitle="Оролцох боломжгүй"
+                selected={rsvpStatus}
+                setSelected={setRsvpStatus}
+              />
+            </div>
 
             <button
-              className="send-btn"
+              className="send-btn rsvp-send"
               onClick={sendRsvp}
             >
               ИЛГЭЭХ
@@ -1082,6 +1088,8 @@ export default function Home() {
                   className="wish-card"
                   key={wish.id}
                 >
+                  <div className="quote-mark">”</div>
+
                   <p>“{wish.text}”</p>
 
                   <div className="wish-author">
@@ -1093,7 +1101,11 @@ export default function Home() {
           )}
 
           <div className="wish-form">
-            <label>
+            <div className="wish-form-title">
+              ✎ ЕРӨӨЛӨӨ БИЧНЭ ҮҮ
+            </div>
+
+            <label className="wish-name-label">
               НЭР
 
               <input
@@ -1114,7 +1126,7 @@ export default function Home() {
                   setWishText(e.target.value)
                 }
                 maxLength={500}
-                placeholder="Ерөөлөө бичнэ үү..."
+                placeholder="Залуу гэр бүлд ерөөлөө бичнэ үү..."
               />
             </label>
 
@@ -1123,7 +1135,7 @@ export default function Home() {
             </div>
 
             <button
-              className="send-btn"
+              className="send-btn wish-send"
               onClick={sendWish}
             >
               ИЛГЭЭХ
@@ -1148,17 +1160,13 @@ export default function Home() {
         </section>
 
         <footer className="footer">
-          <div className="footer-heart">
-            ♥
-          </div>
+          <div className="footer-heart">♥</div>
 
           <div className="footer-names">
             {names}
           </div>
 
-          <p>
-            © 2026 {names}
-          </p>
+          <p>© 2026 {names}</p>
 
           <button
             onClick={() => {
@@ -1347,14 +1355,16 @@ button {
 }
 
 :root {
-  --theme: #06472f;
-  --accent: #c49a21;
-  --page: #fbf7f2;
+  --green: #06472f;
+  --gold: #bd971f;
+  --cream: #fbf7f2;
   --card: #fffaf5;
-  --border: #e1d4c0;
+  --line: #e1d4c0;
 }
 
-/* HOME */
+/* ===============================
+   HOME
+================================ */
 
 .home-page {
   min-height: 100vh;
@@ -1366,13 +1376,25 @@ button {
 }
 
 .home-card {
-  width: min(520px, 100%);
-  text-align: center;
+  width: min(500px, 100%);
   padding: 35px 15px;
+  text-align: center;
 }
 
 .home-ring {
   font-size: 48px;
+}
+
+.tiny-title,
+.section-label {
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.tiny-title {
+  color: #a47e13;
 }
 
 .home-card h1 {
@@ -1380,12 +1402,12 @@ button {
   color: #06472f;
   font-family: Georgia, serif;
   font-size: clamp(38px, 7vw, 58px);
-  font-weight: 500;
   font-style: italic;
+  font-weight: 500;
 }
 
 .home-card p {
-  max-width: 400px;
+  max-width: 390px;
   margin: auto;
   color: #777;
   line-height: 1.6;
@@ -1405,19 +1427,9 @@ button {
   padding: 14px 30px;
 }
 
-.tiny-title,
-.section-label {
-  font-family: Arial, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 3px;
-}
-
-.tiny-title {
-  color: #a47e13;
-}
-
-/* TEMPLATE */
+/* ===============================
+   TEMPLATES
+================================ */
 
 .template-page {
   min-height: 100vh;
@@ -1442,3 +1454,1623 @@ button {
   padding: 22px 0 25px;
   text-align: center;
 }
+
+.template-heading h1 {
+  margin: 7px 0;
+  color: #06472f;
+  font-family: Georgia, serif;
+  font-size: clamp(32px, 5vw, 46px);
+  font-weight: 500;
+}
+
+.template-heading p {
+  color: #777;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.template-card {
+  position: relative;
+  padding: 11px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: white;
+  text-align: left;
+}
+
+.template-card.active {
+  border-color: #ad8b25;
+  box-shadow: 0 10px 28px rgba(0,0,0,.08);
+}
+
+.template-preview {
+  height: 240px;
+  padding: 13px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.template-classic .template-preview {
+  background: #fbf7f2;
+  color: #06472f;
+}
+
+.template-rose .template-preview {
+  background: #fceef0;
+  color: #985666;
+}
+
+.template-sage .template-preview {
+  background: #edf2e9;
+  color: #586f55;
+}
+
+.template-midnight .template-preview {
+  background: #182238;
+  color: #d5bb69;
+}
+
+.template-minimal .template-preview {
+  background: #f4f4f2;
+  color: #333;
+}
+
+.template-mini-heart {
+  text-align: center;
+}
+
+.template-mini-photo {
+  height: 105px;
+  margin-top: 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255,255,255,.55);
+  font-size: 38px;
+}
+
+.template-mini-name {
+  margin-top: 12px;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 23px;
+  font-style: italic;
+}
+
+.template-mini-line {
+  width: 35px;
+  height: 1px;
+  margin: 7px auto;
+  background: currentColor;
+}
+
+.template-mini-box {
+  height: 21px;
+  margin-top: 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  opacity: .35;
+}
+
+.template-mini-box.small {
+  height: 14px;
+}
+
+.template-info {
+  padding: 9px 4px 4px;
+}
+
+.template-info strong,
+.template-info span {
+  display: block;
+}
+
+.template-info span {
+  margin-top: 3px;
+  color: #888;
+  font-size: 11px;
+}
+
+.template-selected {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #06472f;
+  color: white;
+}
+
+.continue-button {
+  display: block;
+  margin: 27px auto 0;
+  padding: 14px 28px;
+}
+
+/* ===============================
+   EDIT FORM
+================================ */
+
+.form-page {
+  min-height: 100vh;
+  padding: 24px 14px 55px;
+  background: #f5ede6;
+  font-family: Arial, sans-serif;
+}
+
+.editor-card {
+  max-width: 680px;
+  margin: auto;
+  padding: 25px;
+  border-radius: 22px;
+  background: white;
+  box-shadow: 0 12px 40px rgba(0,0,0,.06);
+}
+
+.editor-head {
+  text-align: center;
+}
+
+.editor-head h1 {
+  margin: 7px 0;
+  color: #06472f;
+}
+
+.editor-head p {
+  color: #888;
+}
+
+.selected-template-label {
+  margin: 17px 0;
+  padding: 10px;
+  border-radius: 11px;
+  background: #f6f2ed;
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  color: #555;
+  font-weight: 600;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  outline: none;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.field small {
+  text-align: right;
+  color: #aaa;
+}
+
+.upload-card {
+  padding: 18px;
+  border: 1px solid #e4dbcf;
+  border-radius: 17px;
+  background: #fffdf9;
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 26px;
+}
+
+.upload-card h3 {
+  margin: 6px 0;
+  color: #06472f;
+}
+
+.upload-card p {
+  margin: 4px 0 11px;
+  color: #999;
+  font-size: 12px;
+}
+
+.choose-photo {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed #bba486;
+  border-radius: 11px;
+  background: #fff7ed;
+}
+
+.upload-preview {
+  margin-top: 12px;
+  padding: 7px;
+  border-radius: 12px;
+  background: #f4efe9;
+}
+
+.upload-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  display: block;
+  border-radius: 9px;
+}
+
+.upload-actions {
+  margin-top: 9px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.upload-actions button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: white;
+}
+
+.remove-photo {
+  color: #9d4949;
+}
+
+.gallery-editor {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.gallery-edit-item {
+  position: relative;
+}
+
+.gallery-edit-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: contain;
+  background: #f2eee9;
+  border-radius: 9px;
+}
+
+.gallery-edit-item span {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0,0,0,.6);
+  color: white;
+  font-size: 10px;
+}
+
+.gallery-edit-item button {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,.65);
+  color: white;
+}
+
+.preview-btn {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #06472f;
+  color: white;
+  font-weight: 700;
+}
+
+/* ===============================
+   THEMES
+================================ */
+
+.invitation-classic {
+  --theme: #06472f;
+  --theme2: #0d583d;
+  --accent2: #bd971f;
+  --page2: #fbf7f2;
+  --card2: #fffaf5;
+  --border2: #e1d4c0;
+}
+
+.invitation-rose {
+  --theme: #95596a;
+  --theme2: #ab6979;
+  --accent2: #be8f7d;
+  --page2: #fff7f7;
+  --card2: #fffafa;
+  --border2: #ead1d7;
+}
+
+.invitation-sage {
+  --theme: #566e53;
+  --theme2: #71866e;
+  --accent2: #a38d5b;
+  --page2: #f4f6f1;
+  --card2: #fbfcf8;
+  --border2: #d9dfd2;
+}
+
+.invitation-midnight {
+  --theme: #18233c;
+  --theme2: #283854;
+  --accent2: #c4a650;
+  --page2: #f8f4eb;
+  --card2: #fffdf5;
+  --border2: #ded2b7;
+}
+
+.invitation-minimal {
+  --theme: #363636;
+  --theme2: #555;
+  --accent2: #999;
+  --page2: #f7f7f5;
+  --card2: #fff;
+  --border2: #ddd;
+}
+
+/* ===============================
+   INVITATION
+================================ */
+
+.invitation {
+  min-height: 100vh;
+  background: var(--page2);
+  color: var(--theme);
+  font-family: Georgia, serif;
+  overflow-x: hidden;
+}
+
+.topbar {
+  min-height: 68px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: 58px 1fr 58px;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+  background: rgba(255,252,248,.95);
+  backdrop-filter: blur(10px);
+}
+
+.menu-btn {
+  border: 0;
+  background: transparent;
+  color: var(--theme);
+  font-size: 25px;
+}
+
+.topbar-name {
+  text-align: center;
+  font-size: clamp(21px,4vw,30px);
+  font-style: italic;
+}
+
+.music-note {
+  text-align: center;
+  color: var(--theme);
+  font-size: 24px;
+}
+
+/* ===============================
+   HERO
+================================ */
+
+.hero-section {
+  width: 100%;
+  padding: 14px 0 18px;
+}
+
+.hero-stage {
+  position: relative;
+  width: min(760px, calc(100% - 20px));
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 22px;
+  background: #eee9e3;
+  box-shadow: 0 10px 30px rgba(0,0,0,.055);
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  max-height: 720px;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+.hero-placeholder {
+  min-height: 480px;
+  display: grid;
+  place-items: center;
+  color: #999;
+}
+
+.hero-gradient {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 43%;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(251,247,242,.72) 55%,
+      var(--page2) 100%
+    );
+  pointer-events: none;
+}
+
+.hero-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.hero-label {
+  color: var(--accent2);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 5px;
+}
+
+.hero-overlay h1 {
+  margin: 10px 0 8px;
+  color: var(--theme);
+  font-size: clamp(37px,7vw,58px);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.heart-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--accent2);
+}
+
+.heart-line span {
+  width: 42px;
+  height: 1px;
+  background: var(--accent2);
+}
+
+/* ===============================
+   COMMON WIDTHS
+================================ */
+
+.compact-section {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 0;
+}
+
+.greeting-width {
+  width: min(520px, calc(100% - 28px));
+}
+
+.date-width {
+  width: min(520px, calc(100% - 28px));
+}
+
+.venue-width {
+  width: min(540px, calc(100% - 28px));
+}
+
+.section-label {
+  color: var(--accent2);
+  text-align: center;
+}
+
+.section-label.left {
+  text-align: left;
+}
+
+/* ===============================
+   GREETING
+================================ */
+
+.greeting-card {
+  width: 100%;
+  padding: 24px 22px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 19px;
+  background: var(--card2);
+  text-align: center;
+}
+
+.ornament {
+  color: var(--accent2);
+  font-size: 18px;
+}
+
+.ornament.bottom {
+  margin-top: 10px;
+}
+
+.short-line {
+  width: 50px;
+  height: 1px;
+  margin: 10px auto;
+  background: var(--accent2);
+  opacity: .6;
+}
+
+.greeting-card h3 {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.greeting-card p {
+  width: 100%;
+  max-width: 100%;
+  margin: 6px auto 0;
+  color: #5d5954;
+  font-size: 16px;
+  line-height: 1.65;
+  font-style: italic;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* ===============================
+   DATE
+================================ */
+
+.date-time-card {
+  padding: 18px 15px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  background: var(--card2);
+}
+
+.date-block {
+  min-width: 0;
+  text-align: center;
+}
+
+.date-icon {
+  margin-bottom: 6px;
+  color: var(--accent2);
+  font-size: 21px;
+}
+
+.date-block strong {
+  display: block;
+  margin-top: 7px;
+  font-size: clamp(18px,3vw,25px);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.vertical-line {
+  width: 1px;
+  height: 55px;
+  background: var(--border2);
+}
+
+/* ===============================
+   COUNTDOWN
+================================ */
+
+.countdown-section {
+  width: min(520px, calc(100% - 28px));
+  margin: auto;
+  padding: 19px 0 25px;
+  text-align: center;
+}
+
+.countdown-grid {
+  margin-top: 13px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 7px;
+}
+
+.count-box {
+  padding: 12px 2px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 6px 18px rgba(0,0,0,.045);
+}
+
+.count-box strong {
+  display: block;
+  color: var(--theme);
+  font-size: clamp(23px,5vw,32px);
+}
+
+.count-box span {
+  display: block;
+  margin-top: 2px;
+  color: #777;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+}
+
+.today-card {
+  margin-top: 13px;
+  padding: 14px;
+  border: 1px solid var(--accent2);
+  border-radius: 14px;
+}
+
+.empty-text {
+  color: #888;
+}
+
+/* ===============================
+   VENUE
+================================ */
+
+.venue-card {
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 19px;
+  background: var(--card2);
+}
+
+.venue-photo-area {
+  min-height: 205px;
+  padding: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.025);
+}
+
+.venue-photo-area img {
+  width: 100%;
+  height: 205px;
+  object-fit: contain;
+  display: block;
+  border-radius: 11px;
+}
+
+.venue-placeholder {
+  color: #aaa;
+}
+
+.venue-body {
+  padding: 18px 19px 20px;
+}
+
+.venue-body h2 {
+  margin: 8px 0 5px;
+  color: var(--theme);
+  font-size: clamp(25px,4vw,33px);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.venue-body p {
+  margin: 0;
+  color: #555;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.map-btn {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 12px auto 0;
+  padding: 10px 15px;
+  border-radius: 999px;
+  background: var(--theme);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+}
+
+/* ===============================
+   STORY / PHOTO BOOK
+================================ */
+
+.story-section {
+  padding: 34px 10px 36px;
+  background: rgba(255,255,255,.55);
+}
+
+.story-header {
+  margin-bottom: 17px;
+  text-align: center;
+}
+
+.story-header h2 {
+  margin: 6px 0 4px;
+  color: var(--theme);
+  font-size: clamp(28px,5vw,38px);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.story-header p {
+  margin: 0;
+  color: #888;
+  font-size: 12px;
+}
+
+.book-area {
+  width: min(540px, 100%);
+  margin: auto;
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  gap: 8px;
+  align-items: center;
+  perspective: 1600px;
+}
+
+.album-shell {
+  position: relative;
+  padding: 13px;
+  border: 1px solid #d8c8b3;
+  border-radius: 21px;
+  background:
+    linear-gradient(145deg,#fffdf9,#eee4d7);
+  box-shadow:
+    0 18px 35px rgba(0,0,0,.08),
+    inset 0 0 0 5px rgba(255,255,255,.55);
+}
+
+.album-shell::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(185,153,107,.35);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.album-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  z-index: 5;
+  opacity: .55;
+}
+
+.album-corner::before,
+.album-corner::after {
+  content: "";
+  position: absolute;
+  background: var(--accent2);
+}
+
+.album-corner::before {
+  width: 22px;
+  height: 1px;
+}
+
+.album-corner::after {
+  width: 1px;
+  height: 22px;
+}
+
+.top-left {
+  top: 8px;
+  left: 8px;
+}
+
+.top-right {
+  top: 8px;
+  right: 8px;
+  transform: rotate(90deg);
+}
+
+.bottom-left {
+  bottom: 8px;
+  left: 8px;
+  transform: rotate(-90deg);
+}
+
+.bottom-right {
+  bottom: 8px;
+  right: 8px;
+  transform: rotate(180deg);
+}
+
+.book {
+  position: relative;
+  width: 100%;
+  height: 390px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #fff;
+  perspective: 1600px;
+}
+
+.book-base {
+  position: absolute;
+  inset: 0;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+
+.book-base img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+
+.turning-page {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.turning-front,
+.turning-back {
+  position: absolute;
+  inset: 0;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.turning-front img,
+.turning-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+
+.turning-back {
+  transform: rotateY(180deg);
+}
+
+.turning-next {
+  transform-origin: left center;
+  animation: pageNext .76s cubic-bezier(.42,0,.18,1);
+}
+
+.turning-prev {
+  transform-origin: right center;
+  animation: pagePrev .76s cubic-bezier(.42,0,.18,1);
+}
+
+@keyframes pageNext {
+  0% {
+    transform: rotateY(0deg);
+    filter: brightness(1);
+  }
+
+  40% {
+    filter: brightness(.85);
+  }
+
+  100% {
+    transform: rotateY(-180deg);
+    filter: brightness(1);
+  }
+}
+
+@keyframes pagePrev {
+  0% {
+    transform: rotateY(0deg);
+    filter: brightness(1);
+  }
+
+  40% {
+    filter: brightness(.85);
+  }
+
+  100% {
+    transform: rotateY(180deg);
+    filter: brightness(1);
+  }
+}
+
+.book-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 10;
+  width: 1px;
+  opacity: .2;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #777,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.book-arrow {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  background: white;
+  color: var(--theme);
+  font-size: 24px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.05);
+}
+
+.book-arrow:disabled {
+  opacity: .45;
+}
+
+.page-number {
+  margin-top: 12px;
+  color: #888;
+  text-align: center;
+  font-family: Arial,sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.story-dots {
+  margin-top: 11px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.story-dots button {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #c9c2bb;
+}
+
+.story-dots button.active {
+  width: 18px;
+  border-radius: 999px;
+  background: var(--theme);
+}
+
+/* ===============================
+   RSVP
+================================ */
+
+.rsvp-section {
+  padding: 29px 12px 22px;
+}
+
+.rsvp-card {
+  width: min(460px, 100%);
+  margin: auto;
+  padding: 22px 18px;
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  background: var(--card2);
+}
+
+.rsvp-card h2 {
+  margin: 0;
+  color: var(--theme);
+  text-align: center;
+  font-size: clamp(40px,7vw,50px);
+  line-height: 1;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.rsvp-intro {
+  max-width: 340px;
+  margin: 10px auto 14px;
+  color: #555;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.field-heading {
+  margin: 14px 0 7px;
+  text-align: center;
+  font-family: Arial,sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+
+.rsvp-name-input {
+  display: block;
+  width: min(280px,100%);
+  margin: auto;
+  padding: 10px 13px;
+  border: 1.5px solid #d4ddd7;
+  border-radius: 12px;
+  outline: none;
+}
+
+.rsvp-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.rsvp-option {
+  width: min(335px,100%);
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid #d6ded9;
+  border-radius: 12px;
+  background: white;
+  font-family: Arial,sans-serif;
+}
+
+.rsvp-option.selected {
+  border-color: var(--theme);
+  background: rgba(0,0,0,.015);
+}
+
+.rsvp-option strong,
+.rsvp-option span {
+  display: block;
+}
+
+.rsvp-option strong {
+  color: var(--theme);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rsvp-option span {
+  margin-top: 1px;
+  color: #89958d;
+  font-size: 11px;
+}
+
+.send-btn {
+  border: 0;
+  border-radius: 999px;
+  background: var(--theme);
+  color: white;
+  font-family: Arial,sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.rsvp-send {
+  display: block;
+  width: min(280px,100%);
+  margin: 14px auto 0;
+  padding: 11px;
+}
+
+.success-message {
+  margin-top: 10px;
+  color: #387153;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* ===============================
+   WISHES
+================================ */
+
+.wish-section {
+  padding: 24px 12px 28px;
+}
+
+.wish-heading {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-family: Arial,sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+
+.wish-heading span {
+  width: 28px;
+  height: 1px;
+  background: var(--theme);
+}
+
+.wish-list {
+  width: min(460px,100%);
+  margin: 0 auto 12px;
+}
+
+.wish-card {
+  position: relative;
+  margin-bottom: 9px;
+  padding: 18px;
+  border-radius: 17px;
+  background: #fff7e3;
+}
+
+.quote-mark {
+  position: absolute;
+  right: 13px;
+  top: -4px;
+  color: #ddd4bd;
+  font-size: 42px;
+}
+
+.wish-card p {
+  max-width: 390px;
+  margin: 7px auto 10px;
+  color: #555;
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.5;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.wish-author {
+  text-align: center;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.wish-form {
+  width: min(460px,100%);
+  margin: auto;
+  padding: 18px;
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  background: var(--card2);
+}
+
+.wish-form-title {
+  margin-bottom: 11px;
+  color: var(--theme);
+  text-align: center;
+  font-family: Arial,sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+
+.wish-form label {
+  display: block;
+  margin-top: 9px;
+  color: #8d8b80;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.wish-name-label {
+  width: min(280px,100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wish-form input,
+.wish-form textarea {
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid #cfc6b7;
+  background: transparent;
+  outline: none;
+  color: #555;
+  font-family: Georgia,serif;
+  font-size: 15px;
+}
+
+.wish-form textarea {
+  min-height: 76px;
+  resize: vertical;
+  line-height: 1.45;
+  font-style: italic;
+}
+
+.character-count {
+  margin-top: 2px;
+  color: #999;
+  text-align: right;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+}
+
+.wish-send {
+  display: block;
+  width: min(280px,100%);
+  margin: 13px auto 0;
+  padding: 11px;
+}
+
+/* ===============================
+   SHARE
+================================ */
+
+.share-section {
+  width: min(460px, calc(100% - 24px));
+  margin: auto;
+  padding: 19px 0 25px;
+}
+
+.share-buttons {
+  margin-top: 11px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.share-buttons button {
+  padding: 11px 7px;
+  border: 1px solid var(--accent2);
+  border-radius: 999px;
+  background: var(--theme);
+  color: white;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+
+/* ===============================
+   FOOTER
+================================ */
+
+.footer {
+  padding: 27px 15px 22px;
+  text-align: center;
+  background: var(--theme);
+  color: #efd16d;
+}
+
+.footer-heart {
+  font-size: 20px;
+}
+
+.footer-names {
+  margin-top: 5px;
+  font-size: clamp(29px,6vw,41px);
+  font-style: italic;
+}
+
+.footer p {
+  margin: 7px 0;
+  font-family: Arial,sans-serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.footer button {
+  margin-top: 4px;
+  padding: 7px 16px;
+  border: 1px solid #efd16d;
+  border-radius: 999px;
+  background: transparent;
+  color: #efd16d;
+}
+
+/* ===============================
+   MOBILE
+================================ */
+
+@media (max-width: 620px) {
+  .template-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .template-preview {
+    height: 210px;
+    padding: 9px;
+  }
+
+  .template-mini-photo {
+    height: 92px;
+  }
+
+  .template-mini-name {
+    font-size: 19px;
+  }
+
+  .editor-card {
+    padding: 19px 14px;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    min-height: 61px;
+    grid-template-columns: 50px 1fr 50px;
+  }
+
+  .hero-section {
+    padding: 8px 0 13px;
+  }
+
+  .hero-stage {
+    width: calc(100% - 12px);
+    border-radius: 17px;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: auto;
+    max-height: 680px;
+    object-fit: contain;
+  }
+
+  .hero-placeholder {
+    min-height: 420px;
+  }
+
+  .hero-overlay {
+    bottom: 24px;
+  }
+
+  .hero-overlay h1 {
+    font-size: clamp(35px,10vw,47px);
+  }
+
+  .greeting-width,
+  .date-width,
+  .venue-width,
+  .countdown-section {
+    width: calc(100% - 36px);
+  }
+
+  .greeting-card {
+    padding: 21px 16px;
+    border-radius: 16px;
+  }
+
+  .greeting-card p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .date-time-card {
+    padding: 15px 8px;
+    gap: 7px;
+    border-radius: 16px;
+  }
+
+  .date-block strong {
+    font-size: 17px;
+  }
+
+  .vertical-line {
+    height: 50px;
+  }
+
+  .countdown-section {
+    padding: 17px 0 22px;
+  }
+
+  .countdown-grid {
+    gap: 5px;
+  }
+
+  .count-box {
+    padding: 10px 1px;
+  }
+
+  .count-box strong {
+    font-size: 25px;
+  }
+
+  .venue-photo-area {
+    min-height: 185px;
+  }
+
+  .venue-photo-area img {
+    height: 185px;
+  }
+
+  .venue-body {
+    padding: 16px;
+  }
+
+  .story-section {
+    padding: 29px 8px 31px;
+  }
+
+  .story-header h2 {
+    font-size: 30px;
+  }
+
+  .book-area {
+    width: min(460px,100%);
+    grid-template-columns: 31px 1fr 31px;
+    gap: 5px;
+  }
+
+  .book-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 21px;
+  }
+
+  .album-shell {
+    padding: 9px;
+    border-radius: 17px;
+  }
+
+  .book {
+    height: 330px;
+    border-radius: 10px;
+  }
+
+  .book-base,
+  .turning-front,
+  .turning-back {
+    padding: 6px;
+  }
+
+  .rsvp-section {
+    padding: 25px 14px 19px;
+  }
+
+  .rsvp-card {
+    width: min(390px, calc(100% - 14px));
+    padding: 20px 14px;
+  }
+
+  .rsvp-card h2 {
+    font-size: 43px;
+  }
+
+  .rsvp-name-input {
+    width: min(245px,100%);
+  }
+
+  .rsvp-option {
+    width: min(300px,100%);
+  }
+
+  .rsvp-send {
+    width: min(245px,100%);
+  }
+
+  .wish-section {
+    padding: 21px 14px 25px;
+  }
+
+  .wish-list,
+  .wish-form {
+    width: min(390px, calc(100% - 14px));
+  }
+
+  .wish-form {
+    padding: 16px;
+  }
+
+  .wish-name-label {
+    width: min(245px,100%);
+  }
+
+  .wish-send {
+    width: min(245px,100%);
+  }
+
+  .share-section {
+    width: min(390px, calc(100% - 40px));
+  }
+
+  .footer {
+    padding: 24px 14px 20px;
+  }
+}
+
+@media (max-width: 390px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-stage {
+    width: calc(100% - 8px);
+  }
+
+  .greeting-width,
+  .date-width,
+  .venue-width,
+  .countdown-section {
+    width: calc(100% - 28px);
+  }
+
+  .date-time-card {
+    grid-template-columns: 1fr;
+  }
+
+  .vertical-line {
+    width: 65%;
+    height: 1px;
+    margin: auto;
+  }
+
+  .count-box strong {
+    font-size: 22px;
+  }
+
+  .book {
+    height: 300px;
+  }
+
+  .rsvp-card,
+  .wish-list,
+  .wish-form {
+    width: calc(100% - 10px);
+  }
+
+  .share-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+`;
