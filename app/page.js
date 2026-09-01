@@ -175,6 +175,7 @@ export default function Home() {
 
     function calculate() {
       const selectedTime = form.time || "00:00";
+
       const target = new Date(
         `${form.date}T${selectedTime}:00`
       ).getTime();
@@ -632,7 +633,7 @@ export default function Home() {
           )}
         </section>
 
-        <section className="content-section">
+        <section className="content-section venue-section">
           <div className="venue-card">
             <div className="venue-photo-area">
               {form.venuePhoto ? (
@@ -678,52 +679,54 @@ export default function Home() {
 
         {form.gallery.length > 0 && (
           <section className="gallery-section">
-            <div className="gallery-heading">
-              <div>
-                <div className="section-label gold left">
-                  БИДНИЙ ТҮҮХ
+            <div className="gallery-inner">
+              <div className="gallery-heading">
+                <div>
+                  <div className="section-label gold left">
+                    БИДНИЙ ТҮҮХ
+                  </div>
+
+                  <h2>Хуримын дурсамжууд</h2>
                 </div>
 
-                <h2>Хуримын дурсамжууд</h2>
-              </div>
+                <div className="gallery-arrows">
+                  <button
+                    onClick={() =>
+                      galleryScroll.current?.scrollBy({
+                        left: -320,
+                        behavior: "smooth",
+                      })
+                    }
+                  >
+                    ‹
+                  </button>
 
-              <div className="gallery-arrows">
-                <button
-                  onClick={() =>
-                    galleryScroll.current?.scrollBy({
-                      left: -360,
-                      behavior: "smooth",
-                    })
-                  }
-                >
-                  ‹
-                </button>
-
-                <button
-                  onClick={() =>
-                    galleryScroll.current?.scrollBy({
-                      left: 360,
-                      behavior: "smooth",
-                    })
-                  }
-                >
-                  ›
-                </button>
-              </div>
-            </div>
-
-            <div
-              ref={galleryScroll}
-              className="gallery-scroll"
-            >
-              {form.gallery.map((photo) => (
-                <div
-                  className="gallery-photo"
-                  key={photo.id}
-                >
-                  <img src={photo.src} alt="" />
+                  <button
+                    onClick={() =>
+                      galleryScroll.current?.scrollBy({
+                        left: 320,
+                        behavior: "smooth",
+                      })
+                    }
+                  >
+                    ›
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              <div
+                ref={galleryScroll}
+                className="gallery-scroll"
+              >
+                {form.gallery.map((photo) => (
+                  <div
+                    className="gallery-photo"
+                    key={photo.id}
+                  >
+                    <img src={photo.src} alt="" />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -842,7 +845,7 @@ export default function Home() {
                 onChange={(e) =>
                   setWishText(e.target.value)
                 }
-                rows={6}
+                rows={4}
                 maxLength={500}
                 placeholder="Залуу гэр бүлд дулаан ерөөл, хүсэлтээ бичнэ үү..."
               />
@@ -1027,9 +1030,7 @@ function RsvpOption({
 function formatDate(date) {
   if (!date) return "Огноо";
 
-  const value = new Date(
-    `${date}T00:00:00`
-  );
+  const value = new Date(`${date}T00:00:00`);
 
   if (Number.isNaN(value.getTime())) {
     return date;
@@ -1102,16 +1103,16 @@ button {
 
 .home-card {
   width: min(600px, 100%);
-  padding: 50px 25px;
+  padding: 45px 25px;
   text-align: center;
 }
 
 .home-ring {
-  font-size: 55px;
+  font-size: 50px;
 }
 
 .home-card h1 {
-  margin: 18px 0 10px;
+  margin: 16px 0 10px;
   color: var(--green);
   font-family: Georgia, serif;
   font-size: clamp(38px, 7vw, 60px);
@@ -1124,8 +1125,8 @@ button {
 }
 
 .home-card button {
-  margin-top: 20px;
-  padding: 16px 32px;
+  margin-top: 18px;
+  padding: 15px 30px;
   border: 0;
   border-radius: 999px;
   background: var(--green);
@@ -1254,7 +1255,7 @@ button {
 .upload-preview img {
   width: 100%;
   height: auto;
-  max-height: 500px;
+  max-height: 460px;
   display: block;
   object-fit: contain;
   border-radius: 14px;
@@ -1294,7 +1295,7 @@ button {
 
 .gallery-edit-item img {
   width: 100%;
-  height: 130px;
+  height: 120px;
   object-fit: contain;
   background: #f3eee8;
   border-radius: 12px;
@@ -1337,7 +1338,7 @@ button {
 }
 
 .topbar {
-  min-height: 76px;
+  min-height: 72px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -1370,40 +1371,41 @@ button {
 /* HERO */
 
 .hero-section {
-  width: min(920px, 100%);
+  width: min(820px, 100%);
   margin: auto;
-  padding: 22px 18px 45px;
+  padding: 22px 18px 34px;
 }
 
 .hero-frame {
-  width: 100%;
-  min-height: 260px;
+  width: min(680px, 100%);
+  margin: auto;
+  min-height: 220px;
   display: grid;
   place-items: center;
-  padding: 10px;
+  padding: 8px;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 22px;
   background: #f3eee8;
 }
 
 .hero-image {
   width: 100%;
   height: auto;
-  max-height: 520px;
+  max-height: 470px;
   object-fit: contain;
   display: block;
-  border-radius: 18px;
+  border-radius: 16px;
 }
 
 .hero-placeholder {
-  min-height: 300px;
+  min-height: 240px;
   display: grid;
   place-items: center;
   color: #999;
 }
 
 .hero-text {
-  padding: 24px 20px 5px;
+  padding: 20px 20px 0;
   text-align: center;
 }
 
@@ -1416,8 +1418,8 @@ button {
 }
 
 .hero-text h1 {
-  margin: 12px 0;
-  font-size: clamp(36px, 6vw, 58px);
+  margin: 10px 0;
+  font-size: clamp(35px, 6vw, 54px);
   font-weight: 500;
   font-style: italic;
 }
@@ -1431,7 +1433,7 @@ button {
 }
 
 .heart-line span {
-  width: 55px;
+  width: 52px;
   height: 1px;
   background: #d3b552;
 }
@@ -1441,31 +1443,31 @@ button {
 .content-section {
   width: min(760px, calc(100% - 30px));
   margin: auto;
-  padding: 28px 0;
+  padding: 22px 0;
 }
 
 /* GREETING */
 
 .greeting-card {
-  padding: 46px 30px;
+  padding: 34px 28px;
   text-align: center;
   border: 1px solid var(--line);
-  border-radius: 28px;
+  border-radius: 25px;
   background: linear-gradient(
     180deg,
     #fffdf9,
     #faf3e8
   );
-  box-shadow: 0 12px 35px rgba(0,0,0,.04);
+  box-shadow: 0 10px 30px rgba(0,0,0,.035);
 }
 
 .ornament {
   color: #b59a68;
-  font-size: 25px;
+  font-size: 23px;
 }
 
 .ornament.bottom {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .section-label {
@@ -1482,9 +1484,9 @@ button {
 }
 
 .short-line {
-  width: 70px;
+  width: 65px;
   height: 1px;
-  margin: 18px auto;
+  margin: 15px auto;
   background: #c7b48e;
 }
 
@@ -1492,7 +1494,7 @@ button {
   max-width: 580px;
   margin: auto;
   color: #504c46;
-  line-height: 1.75;
+  line-height: 1.7;
   font-size: clamp(18px, 3vw, 22px);
   font-style: italic;
 }
@@ -1500,10 +1502,10 @@ button {
 /* DATE */
 
 .date-time-card {
-  padding: 35px 25px;
+  padding: 28px 24px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 25px;
+  gap: 22px;
   align-items: center;
   border: 1px solid var(--line);
   background: #fffaf4;
@@ -1514,21 +1516,21 @@ button {
 }
 
 .date-icon {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: var(--gold);
-  font-size: 31px;
+  font-size: 28px;
 }
 
 .date-block strong {
   display: block;
-  margin-top: 14px;
-  font-size: clamp(21px, 4vw, 30px);
+  margin-top: 12px;
+  font-size: clamp(21px, 4vw, 29px);
   font-weight: 500;
 }
 
 .vertical-line {
   width: 1px;
-  height: 95px;
+  height: 80px;
   background: #ddd0b8;
 }
 
@@ -1537,40 +1539,40 @@ button {
 .countdown-section {
   width: min(760px, calc(100% - 30px));
   margin: auto;
-  padding: 35px 0 65px;
+  padding: 30px 0 45px;
   text-align: center;
 }
 
 .countdown-grid {
-  margin-top: 25px;
+  margin-top: 20px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .count-box {
-  padding: 22px 5px;
-  border-radius: 18px;
+  padding: 18px 5px;
+  border-radius: 17px;
   background: white;
-  box-shadow: 0 9px 28px rgba(0,0,0,.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,.05);
 }
 
 .count-box strong {
   display: block;
-  font-size: clamp(27px, 5vw, 43px);
+  font-size: clamp(27px, 5vw, 40px);
 }
 
 .count-box span {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: #777;
   font-family: Arial, sans-serif;
   font-size: 11px;
 }
 
 .today-card {
-  margin-top: 25px;
-  padding: 24px;
+  margin-top: 22px;
+  padding: 22px;
   border: 1px solid #d6b64b;
   border-radius: 18px;
   color: #866a08;
@@ -1582,16 +1584,21 @@ button {
 
 /* VENUE */
 
+.venue-section {
+  padding-top: 16px;
+  padding-bottom: 36px;
+}
+
 .venue-card {
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 22px;
   background: #fffaf5;
 }
 
 .venue-photo-area {
-  height: 350px;
-  padding: 14px;
+  height: 280px;
+  padding: 10px;
   display: grid;
   place-items: center;
   background: #f3eee8;
@@ -1602,7 +1609,7 @@ button {
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 .venue-placeholder {
@@ -1610,12 +1617,12 @@ button {
 }
 
 .venue-body {
-  padding: 30px;
+  padding: 24px 26px;
 }
 
 .venue-body h2 {
-  margin: 20px 0 10px;
-  font-size: clamp(29px, 5vw, 42px);
+  margin: 15px 0 8px;
+  font-size: clamp(28px, 5vw, 38px);
   font-style: italic;
   font-weight: 500;
 }
@@ -1623,15 +1630,15 @@ button {
 .venue-body p {
   margin: 0;
   color: #555;
-  font-size: 19px;
+  font-size: 18px;
   font-style: italic;
 }
 
 .map-btn {
   display: block;
   width: 100%;
-  margin-top: 25px;
-  padding: 17px;
+  margin-top: 20px;
+  padding: 14px;
   border: 1px solid #d2aa24;
   border-radius: 999px;
   background: var(--green);
@@ -1646,13 +1653,18 @@ button {
 /* GALLERY */
 
 .gallery-section {
-  margin-top: 30px;
-  padding: 65px 0 80px;
+  margin-top: 12px;
+  padding: 42px 0 48px;
   background: white;
 }
 
+.gallery-inner {
+  width: min(1100px, 100%);
+  margin: auto;
+}
+
 .gallery-heading {
-  padding: 0 35px 25px;
+  padding: 0 30px 20px;
   display: flex;
   justify-content: space-between;
   align-items: end;
@@ -1660,43 +1672,43 @@ button {
 }
 
 .gallery-heading h2 {
-  margin: 10px 0 0;
-  font-size: clamp(29px, 5vw, 42px);
+  margin: 8px 0 0;
+  font-size: clamp(28px, 5vw, 39px);
   font-style: italic;
   font-weight: 500;
 }
 
 .gallery-arrows {
   display: flex;
-  gap: 10px;
+  gap: 9px;
 }
 
 .gallery-arrows button {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border: 1px solid #bbb;
   border-radius: 50%;
   background: white;
   color: var(--green);
-  font-size: 28px;
+  font-size: 27px;
 }
 
 .gallery-scroll {
   display: flex;
-  gap: 18px;
+  gap: 15px;
   overflow-x: auto;
-  padding: 0 35px 18px;
+  padding: 0 30px 14px;
   scroll-snap-type: x mandatory;
 }
 
 .gallery-photo {
-  flex: 0 0 340px;
-  width: 340px;
-  height: 430px;
-  padding: 10px;
+  flex: 0 0 300px;
+  width: 300px;
+  height: 330px;
+  padding: 8px;
   display: grid;
   place-items: center;
-  border-radius: 20px;
+  border-radius: 18px;
   background: #f4efe9;
   scroll-snap-align: start;
 }
@@ -1706,63 +1718,66 @@ button {
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 15px;
+  border-radius: 13px;
 }
 
 /* RSVP */
 
 .rsvp-section {
-  padding: 75px 20px;
+  padding: 50px 20px 38px;
 }
 
 .rsvp-card {
-  max-width: 680px;
+  max-width: 620px;
   margin: auto;
-  padding: 45px 28px;
+  padding: 30px 26px;
   border: 1px solid var(--line);
+  border-radius: 20px;
   background: #fffaf6;
 }
 
 .rsvp-card h2 {
   margin: 0;
   text-align: center;
-  font-size: clamp(48px, 8vw, 68px);
+  font-size: clamp(46px, 7vw, 58px);
+  line-height: 1;
   font-style: italic;
   font-weight: 500;
 }
 
 .rsvp-intro {
+  margin: 16px 0 22px;
   text-align: center;
   color: #555;
-  font-size: 19px;
+  font-size: 18px;
   font-style: italic;
 }
 
 .field-heading {
-  margin: 28px 0 12px;
+  margin: 20px 0 10px;
   text-align: center;
   font-family: Arial, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 4px;
 }
 
 .large-input {
   width: 100%;
-  padding: 17px;
+  padding: 13px 16px;
   border: 2px solid #d4ddd7;
-  border-radius: 18px;
+  border-radius: 15px;
   outline: none;
 }
 
 .rsvp-option {
-  margin-top: 12px;
-  padding: 18px;
+  margin-top: 9px;
+  padding: 13px 16px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 13px;
   border: 2px solid #d6ded9;
-  border-radius: 18px;
+  border-radius: 15px;
   background: white;
   font-family: Arial, sans-serif;
 }
@@ -1778,19 +1793,23 @@ button {
 }
 
 .rsvp-option strong {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
 }
 
 .rsvp-option span {
-  margin-top: 4px;
+  margin-top: 2px;
   color: #8da095;
+  font-size: 14px;
+}
+
+.rsvp-card .send-btn {
+  margin-top: 20px;
 }
 
 .send-btn {
   width: 100%;
-  margin-top: 25px;
-  padding: 17px;
+  padding: 14px;
   border: 0;
   border-radius: 999px;
   background: #9cab9b;
@@ -1801,7 +1820,7 @@ button {
 }
 
 .success-message {
-  margin-top: 15px;
+  margin-top: 13px;
   text-align: center;
   color: #387153;
 }
@@ -1809,72 +1828,73 @@ button {
 /* WISH */
 
 .wish-section {
-  padding: 70px 20px;
+  padding: 40px 20px 42px;
 }
 
 .wish-heading {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 35px;
+  gap: 12px;
+  margin-bottom: 25px;
   font-family: Arial, sans-serif;
   font-weight: 700;
-  letter-spacing: 5px;
+  letter-spacing: 4px;
 }
 
 .wish-heading span {
-  width: 45px;
+  width: 40px;
   height: 1px;
   background: #a6afa7;
 }
 
 .wish-list {
   max-width: 600px;
-  margin: 0 auto 30px;
+  margin: 0 auto 22px;
 }
 
 .wish-card {
   position: relative;
-  margin-bottom: 18px;
-  padding: 40px 28px;
-  border-radius: 25px;
+  margin-bottom: 14px;
+  padding: 28px 24px;
+  border-radius: 22px;
   background: #fff7e3;
 }
 
 .quote-mark {
   position: absolute;
-  top: 7px;
-  right: 20px;
+  top: 3px;
+  right: 18px;
   color: #dddccd;
-  font-size: 68px;
+  font-size: 55px;
 }
 
 .wish-card p {
+  margin: 10px 0 16px;
   text-align: center;
-  font-size: clamp(22px, 4vw, 31px);
-  line-height: 1.6;
+  font-size: clamp(20px, 4vw, 27px);
+  line-height: 1.5;
   font-style: italic;
 }
 
 .wish-author {
   text-align: center;
   font-family: Arial, sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 4px;
 }
 
 .wish-form {
   max-width: 600px;
   margin: auto;
-  padding: 30px 26px;
+  padding: 24px 26px;
   border: 1px solid #ddd2be;
-  border-radius: 26px;
+  border-radius: 22px;
   background: #fff9e9;
 }
 
 .wish-form-title {
-  margin-bottom: 25px;
+  margin-bottom: 18px;
   text-align: center;
   font-family: Arial, sans-serif;
   font-weight: 700;
@@ -1883,7 +1903,7 @@ button {
 
 .wish-form label {
   display: block;
-  margin-top: 18px;
+  margin-top: 14px;
   color: #8d8b80;
   font-family: Arial, sans-serif;
   font-size: 11px;
@@ -1893,29 +1913,33 @@ button {
 .wish-form input,
 .wish-form textarea {
   width: 100%;
-  padding: 14px 0;
+  padding: 10px 0;
   border: 0;
   border-bottom: 1px solid #cfc6b7;
   background: transparent;
   outline: none;
   color: #555;
   font-family: Georgia, serif;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .wish-form textarea {
-  min-height: 140px;
+  min-height: 100px;
   resize: vertical;
-  line-height: 1.7;
+  line-height: 1.55;
   font-style: italic;
 }
 
 .character-count {
-  margin-top: 5px;
+  margin-top: 3px;
   text-align: right;
   color: #999;
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
+}
+
+.wish-form .send-btn {
+  margin-top: 16px;
 }
 
 /* SHARE */
@@ -1923,18 +1947,18 @@ button {
 .share-section {
   max-width: 650px;
   margin: auto;
-  padding: 45px 25px 70px;
+  padding: 30px 25px 38px;
 }
 
 .share-buttons {
-  margin-top: 23px;
+  margin-top: 18px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
 .share-buttons button {
-  padding: 16px;
+  padding: 14px;
   border: 1px solid #d2aa24;
   border-radius: 999px;
   background: var(--green);
@@ -1947,7 +1971,7 @@ button {
 /* FOOTER */
 
 .footer {
-  padding: 70px 25px 50px;
+  padding: 42px 25px 34px;
   text-align: center;
   background: linear-gradient(
     135deg,
@@ -1958,24 +1982,25 @@ button {
 }
 
 .footer-heart {
-  font-size: 32px;
+  font-size: 27px;
 }
 
 .footer-names {
-  margin-top: 15px;
-  font-size: clamp(35px, 7vw, 55px);
+  margin-top: 10px;
+  font-size: clamp(34px, 6vw, 49px);
   font-style: italic;
 }
 
 .footer p {
+  margin: 10px 0;
   font-family: Arial, sans-serif;
   font-size: 10px;
   letter-spacing: 3px;
 }
 
 .footer button {
-  margin-top: 18px;
-  padding: 10px 22px;
+  margin-top: 10px;
+  padding: 9px 20px;
   border: 1px solid #efd170;
   border-radius: 999px;
   background: transparent;
@@ -1994,33 +2019,44 @@ button {
   }
 
   .topbar {
-    grid-template-columns: 55px 1fr 55px;
+    min-height: 62px;
+    grid-template-columns: 52px 1fr 52px;
   }
 
   .hero-section {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding: 15px 12px 28px;
   }
 
   .hero-frame {
-    min-height: 240px;
-    border-radius: 18px;
+    width: 100%;
+    min-height: 190px;
+    border-radius: 17px;
   }
 
   .hero-image {
     width: 100%;
     height: auto;
-    max-height: 480px;
+    max-height: 410px;
     object-fit: contain;
-    border-radius: 14px;
+    border-radius: 13px;
   }
 
   .hero-text {
-    padding-top: 22px;
+    padding-top: 18px;
+  }
+
+  .content-section {
+    padding: 16px 0;
+  }
+
+  .greeting-card {
+    padding: 28px 20px;
   }
 
   .date-time-card {
+    padding: 24px 18px;
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .vertical-line {
@@ -2029,26 +2065,28 @@ button {
     margin: auto;
   }
 
+  .countdown-section {
+    padding: 24px 0 35px;
+  }
+
   .countdown-grid {
     gap: 7px;
   }
 
   .count-box {
-    padding: 17px 2px;
+    padding: 15px 2px;
   }
 
   .venue-photo-area {
-    height: 300px;
-  }
-
-  .venue-photo-area img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    height: 230px;
   }
 
   .venue-body {
-    padding: 24px 20px;
+    padding: 20px 18px;
+  }
+
+  .gallery-section {
+    padding: 34px 0 38px;
   }
 
   .gallery-heading {
@@ -2062,27 +2100,53 @@ button {
   }
 
   .gallery-photo {
-    flex: 0 0 78vw;
-    width: 78vw;
-    height: 400px;
+    flex: 0 0 72vw;
+    width: 72vw;
+    height: 310px;
   }
 
-  .gallery-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  .rsvp-section {
+    padding: 35px 15px 28px;
   }
 
   .rsvp-card {
-    padding: 36px 20px;
+    padding: 26px 18px;
+  }
+
+  .rsvp-card h2 {
+    font-size: 48px;
+  }
+
+  .rsvp-option {
+    padding: 12px 13px;
+  }
+
+  .wish-section {
+    padding: 30px 15px 34px;
+  }
+
+  .wish-card {
+    padding: 24px 18px;
   }
 
   .wish-form {
-    padding: 27px 20px;
+    padding: 22px 18px;
+  }
+
+  .wish-form textarea {
+    min-height: 90px;
+  }
+
+  .share-section {
+    padding: 25px 20px 32px;
   }
 
   .share-buttons {
     grid-template-columns: 1fr;
+  }
+
+  .footer {
+    padding: 34px 20px 28px;
   }
 }
 `;
