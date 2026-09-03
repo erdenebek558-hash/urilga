@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
+import { createClient } from "@supabase/supabase-js";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 const TEMPLATES = [
   {
     id: "classic",
@@ -57,7 +60,46 @@ export default function Home() {
     venuePhoto: "",
     gallery: [],
   });
+useEffect(() => {
+  async function loadInvitation() {
+    const params = new URLSearchParams(window.location.search);
+    const inviteId = params.get("invite");
 
+    if (!inviteId) return;
+setScreen("preview");
+    const { data, error } = await supabase
+      .from("invitations")
+      .select("*")
+      .eq("id", inviteId)
+      .single();
+
+    if (error) {
+      console.error("Supabase load error:", error);
+      return;
+    }
+
+    if (!data) return;
+
+    setTemplate(data.template || "classic");
+
+    setForm((prev) => ({
+      ...prev,
+      groom: data.groom || "",
+      bride: data.bride || "",
+      date: data.date || "",
+      time: data.time || "",
+      venueName: data.venue_name || "",
+      venueAddress: data.venue_address || "",
+      mapUrl: data.map_url || "",
+      message: data.message || "",
+      heroPhoto: data.hero_image_url || "",
+      venuePhoto: data.venue_image_url || "",
+      gallery: data.gallery_urls || [],
+    }));
+  }
+
+  loadInvitation();
+}, []);
   const [countdown, setCountdown] = useState({
     days: 0,
     hours: 0,
@@ -361,19 +403,41 @@ export default function Home() {
     setWishText("");
   }
 
-  function buildShareLink() {
-    const slug = encodeURIComponent(
-      `${form.groom || "groom"}-${
-        form.bride || "bride"
-      }-${form.date || "wedding"}`
-    );
+ async function buildShareLink() {
+  try {
+    const { data, error } = await supabase
+      .from("invitations")
+      .insert([
+        {
+          template: template,
+          groom: form.groom || "",
+          bride: form.bride || "",
+          date: form.date || null,
+          time: form.time || "",
+          venue_name: form.venueName || "",
+          venue_address: form.venueAddress || "",
+          map_url: form.mapUrl || "",
+          message: form.message || "",
+          hero_image_url: heroImage || "",
+          venue_image_url: venueImage || "",
+          gallery_urls: galleryImages || [],
+        },
+      ])
+      .select("id")
+      .single();
 
-    return `${window.location.origin}/?invite=${slug}`;
+    if (error) throw error;
+
+    return `${window.location.origin}/?invite=${data.id}`;
+  } catch (error) {
+    console.error("Supabase save error:", error);
+    alert("Урилгыг хадгалахад алдаа гарлаа.");
+    return "";
   }
+}
 
   async function copyShareLink() {
-    const link = buildShareLink();
-
+    const link = await buildShareLink();
     try {
       await navigator.clipboard.writeText(link);
       alert("Урилгын линк хуулагдлаа.");
@@ -383,7 +447,7 @@ export default function Home() {
   }
 
   async function nativeShare() {
-    const link = buildShareLink();
+    const link = await buildShareLink();
 
     if (navigator.share) {
       try {
